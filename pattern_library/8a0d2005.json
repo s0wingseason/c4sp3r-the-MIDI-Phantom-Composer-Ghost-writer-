@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "id": "8a0d2005",
+    "name": "Midwest Emo Chord Progression",
+    "prompt": "midwest emo",
+    "category": "Chord Progressions",
+    "favorite": false,
+    "created_at": 1775891686.4450266,
+    "updated_at": 1775891686.4450266,
+    "type": "chords",
+    "key_root": 60,
+    "scale_name": "melodic minor",
+    "time_sig": "6/8",
+    "loop_length_beats": 96.0,
+    "bpm_suggestion": 120,
+    "num_events": 32
+  },
+  "pattern": {
+    "pattern_name": "Midwest Emo Chord Progression",
+    "type": "chords",
+    "key_root": 60,
+    "scale_name": "melodic minor",
+    "chord_symbols": [
+      "Cm7",
+      "Bbmaj7",
+      "Abmaj7",
+      "G7"
+    ],
+    "time_signature_num": 6,
+    "time_signature_den": 8,
+    "loop_length_beats": 96.0,
+    "bpm_suggestion": 120,
+    "events": [
+      {
+        "beat": 0,
+        "note": 60,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 0,
+        "note": 63,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 0,
+        "note": 67,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 0,
+        "note": 70,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 2.0,
+        "note": 58,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 2.0,
+        "note": 63,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 2.0,
+        "note": 67,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 2.0,
+        "note": 71,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 4.0,
+        "note": 57,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 4.0,
+        "note": 60,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 4.0,
+        "note": 64,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 4.0,
+        "note": 68,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 6.0,
+        "note": 55,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 6.0,
+        "note": 59,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 6.0,
+        "note": 62,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 6.0,
+        "note": 65,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 8.0,
+        "note": 60,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 8.0,
+        "note": 63,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 8.0,
+        "note": 67,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 8.0,
+        "note": 70,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 10.0,
+        "note": 58,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 10.0,
+        "note": 63,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 10.0,
+        "note": 67,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 10.0,
+        "note": 71,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 12.0,
+        "note": 57,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 12.0,
+        "note": 60,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 12.0,
+        "note": 64,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 12.0,
+        "note": 68,
+        "velocity": 82,
+        "duration": 2.0
+      },
+      {
+        "beat": 14.0,
+        "note": 55,
+        "velocity": 95,
+        "duration": 2.0
+      },
+      {
+        "beat": 14.0,
+        "note": 59,
+        "velocity": 88,
+        "duration": 2.0
+      },
+      {
+        "beat": 14.0,
+        "note": 62,
+        "velocity": 85,
+        "duration": 2.0
+      },
+      {
+        "beat": 14.0,
+        "note": 65,
+        "velocity": 82,
+        "duration": 2.0
+      }
+    ]
+  }
+}

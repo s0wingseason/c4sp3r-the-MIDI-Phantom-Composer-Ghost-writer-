@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "id": "9663df85",
+    "name": "C Minor Pentatonic Ascending Arpeggio - Dark Flow",
+    "prompt": "C minor pentatonic ascending arpeggio, mysterious dark feel, staccato articulation",
+    "category": "Uncategorized",
+    "favorite": false,
+    "created_at": 1775453437.052807,
+    "updated_at": 1775453437.052807,
+    "key_root": 60,
+    "scale_name": "minor pentatonic",
+    "time_sig": "4/4",
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 100,
+    "num_events": 16
+  },
+  "pattern": {
+    "pattern_name": "C Minor Pentatonic Ascending Arpeggio - Dark Flow",
+    "key_root": 60,
+    "scale_name": "minor pentatonic",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 100,
+    "events": [
+      {
+        "beat": 0,
+        "note": 60,
+        "velocity": 100,
+        "duration": 0.48
+      },
+      {
+        "beat": 0.5,
+        "note": 63,
+        "velocity": 90,
+        "duration": 0.48
+      },
+      {
+        "beat": 1.0,
+        "note": 65,
+        "velocity": 95,
+        "duration": 0.48
+      },
+      {
+        "beat": 1.5,
+        "note": 67,
+        "velocity": 105,
+        "duration": 0.48
+      },
+      {
+        "beat": 2.0,
+        "note": 70,
+        "velocity": 90,
+        "duration": 0.48
+      },
+      {
+        "beat": 2.5,
+        "note": 72,
+        "velocity": 100,
+        "duration": 0.48
+      },
+      {
+        "beat": 3.0,
+        "note": 67,
+        "velocity": 80,
+        "duration": 0.48
+      },
+      {
+        "beat": 3.5,
+        "note": 75,
+        "velocity": 110,
+        "duration": 0.48
+      },
+      {
+        "beat": 4.0,
+        "note": 77,
+        "velocity": 95,
+        "duration": 0.48
+      },
+      {
+        "beat": 4.5,
+        "note": 79,
+        "velocity": 100,
+        "duration": 0.48
+      },
+      {
+        "beat": 5.0,
+        "note": 82,
+        "velocity": 110,
+        "duration": 0.48
+      },
+      {
+        "beat": 5.5,
+        "note": 84,
+        "velocity": 120,
+        "duration": 0.48
+      },
+      {
+        "beat": 6.0,
+        "note": 82,
+        "velocity": 85,
+        "duration": 0.48
+      },
+      {
+        "beat": 6.5,
+        "note": 79,
+        "velocity": 75,
+        "duration": 0.48
+      },
+      {
+        "beat": 7.0,
+        "note": 77,
+        "velocity": 80,
+        "duration": 0.48
+      },
+      {
+        "beat": 7.5,
+        "note": 75,
+        "velocity": 70,
+        "duration": 0.48
+      }
+    ]
+  }
+}

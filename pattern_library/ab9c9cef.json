@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "id": "ab9c9cef",
+    "name": "Midwest Emo 5-against-4 Arpeggio",
+    "prompt": "MIdwest emo and math rock arpeggio",
+    "category": "Uncategorized",
+    "favorite": false,
+    "created_at": 1775455367.981213,
+    "updated_at": 1775455367.981213,
+    "key_root": 64,
+    "scale_name": "E Major 7 add 9",
+    "time_sig": "4/4",
+    "loop_length_beats": 4.0,
+    "bpm_suggestion": 160,
+    "num_events": 5
+  },
+  "pattern": {
+    "pattern_name": "Midwest Emo 5-against-4 Arpeggio",
+    "key_root": 64,
+    "scale_name": "E Major 7 add 9",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 4.0,
+    "bpm_suggestion": 160,
+    "events": [
+      {
+        "beat": 0,
+        "note": 64,
+        "velocity": 110,
+        "duration": 0.7
+      },
+      {
+        "beat": 0.8,
+        "note": 71,
+        "velocity": 95,
+        "duration": 0.7
+      },
+      {
+        "beat": 1.6,
+        "note": 68,
+        "velocity": 80,
+        "duration": 0.7
+      },
+      {
+        "beat": 2.4,
+        "note": 78,
+        "velocity": 105,
+        "duration": 0.7
+      },
+      {
+        "beat": 3.2,
+        "note": 75,
+        "velocity": 90,
+        "duration": 0.7
+      }
+    ]
+  }
+}

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FalconEYE AI Arpeggio & Drum Generator</title>
+    <meta name="description" content="AI-powered MIDI arpeggio and drum loop generator for REAPER">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="bg-particles" id="bgParticles"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" stroke="url(#lg)" stroke-width="2.5" fill="none" />
+                        <path d="M12 28 L20 12 L28 28" stroke="url(#lg)" stroke-width="2.5" fill="none"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="20" cy="20" r="3" fill="url(#lg)" />
+                        <defs>
+                            <linearGradient id="lg" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#a855f7" />
+                                <stop offset="100%" stop-color="#6366f1" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>FalconEYE</h1><span class="logo-subtitle">AI Music Generator</span>
+                </div>
+            </div>
+            <!-- Tab nav -->
+            <nav class="header-tabs">
+                <button class="tab active" data-tab="compose">Compose</button>
+                <button class="tab" data-tab="library">Library</button>
+            </nav>
+            <div class="header-actions">
+                <button class="btn-icon" id="btnSettings" title="Settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ============ COMPOSE TAB ============ -->
+        <main class="main-grid tab-content active" id="tabCompose">
+            <!-- Left: Prompt & Controls -->
+            <section class="panel prompt-panel">
+                <div class="panel-header">
+                    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>Compose</h2>
+                </div>
+                <div class="panel-body">
+                    <!-- ===== MODE TOGGLE ===== -->
+                    <div class="mode-toggle-container">
+                        <div class="mode-toggle" id="modeToggle">
+                            <button class="mode-btn active" data-mode="melodic" id="modeMelodic">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zM21 16c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z"/>
+                                </svg>
+                                Melodic Arpeggio
+                            </button>
+                            <button class="mode-btn" data-mode="drums" id="modeDrums">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <line x1="12" y1="2" x2="12" y2="8"/>
+                                    <line x1="12" y1="16" x2="12" y2="22"/>
+                                    <line x1="2" y1="12" x2="8" y2="12"/>
+                                    <line x1="16" y1="12" x2="22" y2="12"/>
+                                </svg>
+                                Drum Loop
+                            </button>
+                            <button class="mode-btn" data-mode="chords" id="modeChords">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="6" width="4" height="14" rx="1"/>
+                                    <rect x="10" y="4" width="4" height="16" rx="1"/>
+                                    <rect x="18" y="8" width="4" height="12" rx="1"/>
+                                </svg>
+                                Chord Progression
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="promptInput">Describe your <span id="promptTypeLabel">arpeggio</span></label>
+                        <textarea id="promptInput" rows="4"
+                            placeholder="e.g. Dark ambient C minor arpeggio, ascending then descending with ghost notes, triplet feel, 2 bars..."></textarea>
+                    </div>
+
+                    <!-- Melodic-only params -->
+                    <div class="params-grid" id="melodicParams">
+                        <div class="form-group compact"><label for="paramKey">Key</label>
+                            <select id="paramKey">
+                                <option value="">Auto</option>
+                                <option value="C">C</option>
+                                <option value="C#">C#/Db</option>
+                                <option value="D">D</option>
+                                <option value="Eb">Eb</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="F#">F#/Gb</option>
+                                <option value="G">G</option>
+                                <option value="Ab">Ab</option>
+                                <option value="A">A</option>
+                                <option value="Bb">Bb</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+                        <div class="form-group compact"><label for="paramScale">Scale</label>
+                            <select id="paramScale">
+                                <option value="">Auto</option>
+                                <option value="major">Major (Ionian)</option>
+                                <option value="minor">Minor (Aeolian)</option>
+                                <option value="minor pentatonic">Minor Penta</option>
+                                <option value="major pentatonic">Major Penta</option>
+                                <option value="dorian">Dorian</option>
+                                <option value="phrygian">Phrygian</option>
+                                <option value="lydian">Lydian</option>
+                                <option value="mixolydian">Mixolydian</option>
+                                <option value="locrian">Locrian</option>
+                                <option value="harmonic minor">Harmonic Minor</option>
+                                <option value="melodic minor">Melodic Minor</option>
+                                <option value="phrygian dominant">Phrygian Dom.</option>
+                                <option value="blues">Blues</option>
+                                <option value="whole tone">Whole Tone</option>
+                                <option value="diminished">Diminished</option>
+                                <option value="half-whole diminished">Half-Whole Dim.</option>
+                                <option value="bebop dominant">Bebop Dom.</option>
+                                <option value="hungarian minor">Hungarian Minor</option>
+                                <option value="chromatic">Chromatic</option>
+                                <option value="__custom">Custom...</option>
+                            </select>
+                            <input type="text" id="paramScaleCustom" class="custom-param-input" placeholder="e.g. Lydian b7"
+                                style="display:none" />
+                        </div>
+                        <div class="form-group compact"><label for="paramOctave">Octave Range</label>
+                            <select id="paramOctave">
+                                <option value="">Auto</option>
+                                <option value="1 octave">1 Oct</option>
+                                <option value="2 octaves" selected>2 Oct</option>
+                                <option value="3 octaves">3 Oct</option>
+                                <option value="4 octaves">4 Oct</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Shared params (both modes) -->
+                    <div class="params-grid" id="sharedParams">
+                        <div class="form-group compact"><label for="paramTimeSig">Time Sig</label>
+                            <select id="paramTimeSig">
+                                <option value="">Auto</option>
+                                <option value="2/4">2/4</option>
+                                <option value="3/4">3/4</option>
+                                <option value="4/4" selected>4/4</option>
+                                <option value="5/4">5/4</option>
+                                <option value="6/4">6/4</option>
+                                <option value="6/8">6/8</option>
+                                <option value="7/8">7/8</option>
+                                <option value="9/8">9/8</option>
+                                <option value="12/8">12/8</option>
+                                <option value="2/2">2/2 (Cut)</option>
+                                <option value="__custom">Custom...</option>
+                            </select>
+                            <input type="text" id="paramTimeSigCustom" class="custom-param-input" placeholder="e.g. 11/8"
+                                style="display:none" />
+                        </div>
+                        <div class="form-group compact"><label for="paramBars">Bars</label>
+                            <select id="paramBars">
+                                <option value="">Auto</option>
+                                <option value="1">1</option>
+                                <option value="2" selected>2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="6">6</option>
+                                <option value="8">8</option>
+                                <option value="12">12</option>
+                                <option value="16">16</option>
+                                <option value="32">32</option>
+                                <option value="__custom">Custom...</option>
+                            </select>
+                            <input type="number" id="paramBarsCustom" class="custom-param-input" placeholder="e.g. 24"
+                                min="1" max="64" style="display:none" />
+                        </div>
+                        <div class="form-group compact"><label for="paramSubdivision">Subdivision</label>
+                            <select id="paramSubdivision">
+                                <option value="">Auto</option>
+                                <option value="quarter notes">Quarter</option>
+                                <option value="eighth notes" selected>8th</option>
+                                <option value="sixteenth notes">16th</option>
+                                <option value="thirty-second notes">32nd</option>
+                                <option value="triplets">Triplets</option>
+                                <option value="dotted eighth">Dotted 8th</option>
+                                <option value="swing eighth">Swing 8th</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Save-to category -->
+                    <div class="form-group compact"><label for="paramCategory">Save to Category</label>
+                        <select id="paramCategory">
+                            <option value="Uncategorized">Uncategorized</option>
+                        </select>
+                    </div>
+
+                    <!-- ===== MELODIC Quick Styles ===== -->
+                    <div class="form-group" id="melodicStyles">
+                        <label>Quick Styles</label>
+                        <div class="style-group-label">Trap & Hip-Hop</div>
+                        <div class="preset-chips">
+                            <button class="chip" data-style="dark trap arpeggio with 808 feel, minor key, eerie bell-like tones, rapid sixteenth notes">Trap</button>
+                            <button class="chip" data-style="rage beat arpeggio, distorted aggressive synth lead, fast chaotic notes, minor key">Rage</button>
+                            <button class="chip" data-style="cloud rap arpeggio, dreamy ethereal floating synth, reverb-drenched, slow and spacey">Cloud Rap</button>
+                            <button class="chip" data-style="drill arpeggio, dark sliding melody, menacing minor key, staccato hits">Drill</button>
+                            <button class="chip" data-style="plugg/plug beat arpeggio, bouncy plucky melody, playful and catchy">Plugg</button>
+                            <button class="chip" data-style="boom bap melodic arpeggio, jazzy sampled feel, warm with swing">Boom Bap</button>
+                            <button class="chip" data-style="phonk arpeggio, dark memphis cowbell melody, distorted and gritty">Phonk</button>
+                        </div>
+                        <div class="style-group-label">Hyperpop & Digicore</div>
+                        <div class="preset-chips">
+                            <button class="chip" data-style="hyperpop arpeggio, glitchy pitch-shifted, aggressive bright tones, fast and chaotic">Hyperpop</button>
+                            <button class="chip" data-style="digicore arpeggio, digital ethereal glitchy melody, breakcore-influenced, emotional">Digicore</button>
+                            <button class="chip" data-style="PC music style arpeggio, bubbly hyper-synthetic, pitch-bent pop melody">PC Music</button>
+                            <button class="chip" data-style="nightcore-style fast arpeggio, bright euphoric major key, rapid ascending runs">Nightcore</button>
+                            <button class="chip" data-style="glitchcore arpeggio, stuttered broken melodic fragments, distorted bitcrushed feel">Glitchcore</button>
+                        </div>
+                        <div class="style-group-label">Indie & Emo</div>
+                        <div class="preset-chips">
+                            <button class="chip" data-style="midwest emo arpeggio, twinkly clean guitar-like, mathy time changes, emotional minor key">Midwest Emo</button>
+                            <button class="chip" data-style="indie rock arpeggio, jangly bright open chords, clean tone, upbeat">Indie Rock</button>
+                            <button class="chip" data-style="indie pop arpeggio, sparkling synth melody, dreamy and catchy, major key">Indie Pop</button>
+                            <button class="chip" data-style="shoegaze arpeggio, wall of sound layered melody, lush reverb, slow dreamy">Shoegaze</button>
+                            <button class="chip" data-style="emo rap melodic arpeggio, sad guitar-like tones, emotional descending, minor key">Emo Rap</button>
+                            <button class="chip" data-style="math rock arpeggio, complex tapping-style pattern, odd meters, technical">Math Rock</button>
+                        </div>
+                        <div class="style-group-label">Electronic & Synth</div>
+                        <div class="preset-chips">
+                            <button class="chip" data-style="synthwave retro 80s arpeggio, nostalgic analog synth, driving pulse">Synthwave</button>
+                            <button class="chip" data-style="new wave arpeggio, post-punk angular synth melody, minimal and dark">New Wave</button>
+                            <button class="chip" data-style="lo-fi gentle arpeggio, warm detuned Rhodes feel, jazzy and mellow">Lo-Fi</button>
+                            <button class="chip" data-style="vaporwave arpeggio, slowed-down dreamy chopped melody, nostalgic and hazy">Vaporwave</button>
+                            <button class="chip" data-style="future bass arpeggio, bright supersaw chord plucks, uplifting and euphoric">Future Bass</button>
+                            <button class="chip" data-style="dark ambient, sparse, atmospheric with reverb, haunting drone-like tones">Dark Ambient</button>
+                        </div>
+                        <div class="style-group-label">Fundamentals</div>
+                        <div class="preset-chips">
+                            <button class="chip" data-style="ascending arpeggio, smooth legato">Ascending</button>
+                            <button class="chip" data-style="descending arpeggio, staccato">Descending</button>
+                            <button class="chip" data-style="random/broken chord pattern, syncopated">Broken Chord</button>
+                            <button class="chip" data-style="trance gate arpeggio, driving rhythmic">Trance Gate</button>
+                            <button class="chip" data-style="generative random note pattern, aleatoric, unpredictable">Random</button>
+                        </div>
+                    </div>
+
+                    <!-- ===== DRUM Quick Styles ===== -->
+                    <div class="form-group" id="drumStyles" style="display:none">
+                        <label>Drum Styles</label>
+                        <div class="style-group-label">Trap & Hip-Hop</div>
+                        <div class="preset-chips">
+                            <button class="chip drum-chip" data-style="trap drum pattern with rapid hi-hat rolls and 808 kick, bouncy">Trap</button>
+                            <button class="chip drum-chip" data-style="rage beat drums, aggressive distorted 808, fast hi-hat rolls, chaotic energy">Rage</button>
+                            <button class="chip drum-chip" data-style="drill music drum pattern with sliding hi-hats, hard 808 kick, dark bounce">Drill</button>
+                            <button class="chip drum-chip" data-style="plugg beat drums, soft bouncy kick pattern, minimal hi-hats, playful">Plugg</button>
+                            <button class="chip drum-chip" data-style="phonk drum pattern, dark memphis percussion, cowbell, distorted punch">Phonk</button>
+                            <button class="chip drum-chip" data-style="boom bap hip-hop drums with swing, classic 90s sample chop feel">Boom Bap</button>
+                            <button class="chip drum-chip" data-style="cloud rap drums, sparse minimal kick and snare, soft spacey hi-hats">Cloud Rap</button>
+                        </div>
+                        <div class="style-group-label">Hyperpop & Digicore</div>
+                        <div class="preset-chips">
+                            <button class="chip drum-chip" data-style="hyperpop drum pattern, distorted glitchy percussion, pitch-shifted snares, chaotic">Hyperpop</button>
+                            <button class="chip drum-chip" data-style="digicore drums, breakcore-influenced glitchy beats, emotional and fast">Digicore</button>
+                            <button class="chip drum-chip" data-style="breakcore drum pattern, chopped amen breaks, stuttered and chaotic">Breakcore</button>
+                        </div>
+                        <div class="style-group-label">Indie & Emo</div>
+                        <div class="preset-chips">
+                            <button class="chip drum-chip" data-style="midwest emo drum pattern, dynamic with fills, mathy odd time signatures">Midwest Emo</button>
+                            <button class="chip drum-chip" data-style="indie rock drum beat, driving and energetic, tight snare and toms">Indie Rock</button>
+                            <button class="chip drum-chip" data-style="indie pop drum beat, light bouncy groove, consistent hi-hats">Indie Pop</button>
+                            <button class="chip drum-chip" data-style="pop punk drum pattern, fast driving beat with crashes, energetic">Pop Punk</button>
+                        </div>
+                        <div class="style-group-label">Electronic & Dance</div>
+                        <div class="preset-chips">
+                            <button class="chip drum-chip" data-style="future bass drum pattern, sidechained kick with snappy snare, bright percussion">Future Bass</button>
+                            <button class="chip drum-chip" data-style="house music four-on-the-floor with open hi-hats, groove">House</button>
+                            <button class="chip drum-chip" data-style="drum and bass breakbeat, fast and syncopated, rolling hi-hats">DnB</button>
+                            <button class="chip drum-chip" data-style="lo-fi hip-hop drums, gentle swing, warm vinyl crackle feel">Lo-Fi</button>
+                            <button class="chip drum-chip" data-style="synthwave drum machine pattern, retro 80s Roland-style, gated reverb snare">Synthwave</button>
+                            <button class="chip drum-chip" data-style="new wave drum pattern, minimal post-punk percussion, tight and angular">New Wave</button>
+                        </div>
+                        <div class="style-group-label">Other</div>
+                        <div class="preset-chips">
+                            <button class="chip drum-chip" data-style="standard rock drum beat, driving kick and snare with hi-hats">Rock</button>
+                            <button class="chip drum-chip" data-style="funk drum groove with ghost notes on snare, syncopated">Funk</button>
+                            <button class="chip drum-chip" data-style="shuffle drum beat, triplet feel with swung hi-hats">Shuffle</button>
+                            <button class="chip drum-chip" data-style="half-time drum beat, spacious and heavy, trap-influenced">Half-Time</button>
+                        </div>
+                    </div>
+
+                    <!-- ===== CHORD Quick Styles ===== -->
+                    <div class="form-group" id="chordStyles" style="display:none">
+                        <label>Chord Styles</label>
+                        <div class="style-group-label">Trap & Hip-Hop</div>
+                        <div class="preset-chips">
+                            <button class="chip chord-chip" data-style="trap chord progression, dark minor voicings, 808 bass-ready, chromatic movement">Trap</button>
+                            <button class="chip chord-chip" data-style="drill chord progression, dark and menacing minor chords, sparse and cold">Drill</button>
+                            <button class="chip chord-chip" data-style="cloud rap chord progression, dreamy ethereal pads, lush reverbed voicings">Cloud Rap</button>
+                            <button class="chip chord-chip" data-style="emo rap chord progression, sad piano-driven minor chords, emotional with suspensions">Emo Rap</button>
+                            <button class="chip chord-chip" data-style="phonk chord progression, dark memphis-style, minor key with tritones">Phonk</button>
+                        </div>
+                        <div class="style-group-label">Hyperpop & Electronic</div>
+                        <div class="preset-chips">
+                            <button class="chip chord-chip" data-style="hyperpop chord progression, bright chaotic, unexpected key changes, hyper-synthetic">Hyperpop</button>
+                            <button class="chip chord-chip" data-style="EDM chord progression, big room anthemic feel, uplifting">EDM</button>
+                            <button class="chip chord-chip" data-style="future bass chord progression, lush supersaws, major 7ths and add9s, euphoric">Future Bass</button>
+                            <button class="chip chord-chip" data-style="synthwave retro chord progression, lush pads with suspended chords, nostalgic">Synthwave</button>
+                            <button class="chip chord-chip" data-style="lo-fi hip-hop chord progression, warm jazzy chords with 7ths, mellow">Lo-Fi</button>
+                        </div>
+                        <div class="style-group-label">Indie & Emo</div>
+                        <div class="preset-chips">
+                            <button class="chip chord-chip" data-style="midwest emo chord progression, twinkly open voicings, emotional with suspensions and add9s">Midwest Emo</button>
+                            <button class="chip chord-chip" data-style="indie rock chord progression, jangly open chords, bright and driving">Indie Rock</button>
+                            <button class="chip chord-chip" data-style="indie pop chord progression, sparkling synth pads, dreamy and catchy">Indie Pop</button>
+                            <button class="chip chord-chip" data-style="shoegaze chord progression, layered wall of sound, lush reverbed voicings">Shoegaze</button>
+                        </div>
+                        <div class="style-group-label">R&B & Soul</div>
+                        <div class="preset-chips">
+                            <button class="chip chord-chip" data-style="neo-soul chord progression with rich extensions, 9ths and 13ths, dreamy">Neo-Soul</button>
+                            <button class="chip chord-chip" data-style="R&B chord progression with smooth voice leading and added 9ths">R&B</button>
+                            <button class="chip chord-chip" data-style="trap soul chord progression, dark minor voicings with chromatic movement">Trap Soul</button>
+                            <button class="chip chord-chip" data-style="gospel chord progression with chromatic passing chords and lush voicings">Gospel</button>
+                        </div>
+                        <div class="style-group-label">Jazz & Classical</div>
+                        <div class="preset-chips">
+                            <button class="chip chord-chip" data-style="jazz ii-V-I chord progression with 7th extensions, smooth voice leading">Jazz ii-V-I</button>
+                            <button class="chip chord-chip" data-style="smooth jazz chord progression, sophisticated harmony">Smooth Jazz</button>
+                            <button class="chip chord-chip" data-style="cinematic epic chord progression, building tension and release, dramatic">Cinematic</button>
+                            <button class="chip chord-chip" data-style="modal interchange chord progression, borrowing from parallel modes">Modal</button>
+                            <button class="chip chord-chip" data-style="blues chord progression, classic 12-bar with dominant 7ths">12-Bar Blues</button>
+                        </div>
+                    </div>
+
+                    <!-- Provider & Iterations Controls -->
+                    <div class="gen-options-row" id="genOptionsRow">
+                        <div class="provider-toggles">
+                            <label class="provider-label">Providers</label>
+                            <label class="provider-toggle" title="Google Gemini">
+                                <input type="checkbox" id="provGemini" value="gemini">
+                                <span class="provider-chip gemini-chip">Gemini</span>
+                            </label>
+                            <label class="provider-toggle" title="OpenAI GPT">
+                                <input type="checkbox" id="provOpenAI" value="openai">
+                                <span class="provider-chip openai-chip">OpenAI</span>
+                            </label>
+                            <label class="provider-toggle" title="Anthropic Claude">
+                                <input type="checkbox" id="provClaude" value="claude">
+                                <span class="provider-chip claude-chip">Claude</span>
+                            </label>
+                        </div>
+                        <div class="iterations-control">
+                            <label for="paramIterations">Variations</label>
+                            <select id="paramIterations">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn-generate" id="btnGenerate">
+                        <span class="btn-text" id="generateBtnText">Generate Pattern</span>
+                        <span class="btn-loading"><span class="spinner"></span><span
+                                class="loading-text">Composing...</span></span>
+                        <svg class="btn-icon-spark" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                    </button>
+                    <div class="status-bar" id="statusBar">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span class="status-text" id="statusText">Ready</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Preview -->
+            <section class="panel preview-panel">
+                <div class="panel-header">
+                    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="2" y="3" width="20" height="18" rx="2" />
+                            <line x1="2" y1="9" x2="22" y2="9" />
+                        </svg>Pattern Preview</h2>
+                    <div class="preview-meta" id="previewMeta"></div>
+                </div>
+                <div class="panel-body">
+                    <div class="piano-roll-container" id="pianoRollContainer">
+                        <canvas id="pianoRoll" width="800" height="300"></canvas>
+                        <div class="piano-roll-placeholder" id="pianoRollPlaceholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" opacity="0.3">
+                                <path
+                                    d="M9 18V5l12-2v13M9 18c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3zM21 16c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z" />
+                            </svg>
+                            <p>Your generated pattern will appear here</p>
+                        </div>
+                    </div>
+                    <!-- MIDI Preview Controls -->
+                    <div class="preview-controls" id="previewControls" style="display:none">
+                        <div class="preview-row">
+                            <button class="btn-preview-play" id="btnPreviewPlay" title="Play preview">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                            </button>
+                            <button class="btn-preview-stop" id="btnPreviewStop" title="Stop preview">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                                </svg>
+                            </button>
+                            <label class="preview-loop-label">
+                                <input type="checkbox" id="previewLoop"> Loop
+                            </label>
+                            <select id="previewInstrument" class="preview-instrument-select">
+                                <option value="0">Piano</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Result Carousel Navigation -->
+                    <div class="result-carousel" id="resultCarousel" style="display:none">
+                        <button class="carousel-btn" id="btnPrevResult" title="Previous result">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"/>
+                            </svg>
+                        </button>
+                        <div class="carousel-info">
+                            <span class="carousel-counter" id="carouselCounter">1 / 1</span>
+                            <span class="carousel-provider" id="carouselProvider"></span>
+                        </div>
+                        <button class="carousel-btn" id="btnNextResult" title="Next result">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Pattern info -->
+                    <div class="pattern-info" id="patternInfo" style="display:none">
+                        <div class="info-card"><span class="info-label">Pattern</span><span class="info-value"
+                                id="infoName">—</span></div>
+                        <div class="info-card"><span class="info-label">Events</span><span class="info-value"
+                                id="infoEvents">—</span></div>
+                        <div class="info-card"><span class="info-label">Length</span><span class="info-value"
+                                id="infoLength">—</span></div>
+                        <div class="info-card"><span class="info-label">Time Sig</span><span class="info-value"
+                                id="infoTimeSig">—</span></div>
+                        <div class="info-card" id="infoScaleCard"><span class="info-label">Scale</span><span class="info-value"
+                                id="infoScale">—</span></div>
+                        <div class="info-card"><span class="info-label">BPM</span><span class="info-value"
+                                id="infoBPM">—</span></div>
+                        <!-- Drum-only info cards -->
+                        <div class="info-card" id="infoKitCard" style="display:none"><span class="info-label">Kit</span><span class="info-value"
+                                id="infoKit">—</span></div>
+                        <div class="info-card" id="infoTypeCard" style="display:none"><span class="info-label">Type</span><span class="info-value"
+                                id="infoType">—</span></div>
+                    </div>
+
+                    <!-- ✏️ Modify This Beat Panel -->
+                    <div class="modify-panel" id="modifyPanel" style="display:none">
+                        <button class="modify-toggle" id="btnModifyToggle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Modify This Beat
+                        </button>
+                        <div class="modify-body" id="modifyBody" style="display:none">
+                            <div class="form-group">
+                                <label for="modifyPrompt">What to change</label>
+                                <textarea id="modifyPrompt" rows="2"
+                                    placeholder="e.g. add ghost notes, make it darker, increase syncopation, double the length..."></textarea>
+                            </div>
+                            <div class="modify-overrides" id="modifyOverrides">
+                                <div class="form-group compact">
+                                    <label for="modBPM">BPM</label>
+                                    <input type="number" id="modBPM" min="40" max="300" placeholder="—">
+                                </div>
+                                <div class="form-group compact">
+                                    <label for="modBars">Bars</label>
+                                    <select id="modBars">
+                                        <option value="">Same</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="4">4</option>
+                                        <option value="8">8</option>
+                                    </select>
+                                </div>
+                                <div class="form-group compact" id="modKeyGroup">
+                                    <label for="modKey">Key</label>
+                                    <select id="modKey">
+                                        <option value="">Same</option>
+                                        <option value="C">C</option><option value="C#">C#</option>
+                                        <option value="D">D</option><option value="Eb">Eb</option>
+                                        <option value="E">E</option><option value="F">F</option>
+                                        <option value="F#">F#</option><option value="G">G</option>
+                                        <option value="Ab">Ab</option><option value="A">A</option>
+                                        <option value="Bb">Bb</option><option value="B">B</option>
+                                    </select>
+                                </div>
+                                <div class="form-group compact" id="modScaleGroup">
+                                    <label for="modScale">Scale</label>
+                                    <select id="modScale">
+                                        <option value="">Same</option>
+                                        <option value="major">Major</option>
+                                        <option value="minor">Minor</option>
+                                        <option value="minor pentatonic">Min Penta</option>
+                                        <option value="dorian">Dorian</option>
+                                        <option value="phrygian">Phrygian</option>
+                                        <option value="lydian">Lydian</option>
+                                        <option value="harmonic minor">Harm. Min</option>
+                                        <option value="blues">Blues</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modify-actions">
+                                <button class="btn-modify" id="btnApplyModify">
+                                    <span class="btn-text">Apply Changes</span>
+                                    <span class="btn-loading"><span class="spinner"></span><span class="loading-text">Modifying...</span></span>
+                                </button>
+                                <button class="btn-revert" id="btnRevert" title="Undo last modification" style="display:none">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="1 4 1 10 7 10"/>
+                                        <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+                                    </svg>
+                                    Revert
+                                </button>
+                            </div>
+                            <!-- Version breadcrumbs -->
+                            <div class="version-dots" id="versionDots" style="display:none"></div>
+                        </div>
+                    </div>
+
+                    <div class="reaper-hint" id="reaperHint" style="display:none">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        <span>Pattern saved! In REAPER, click <strong>Reload Pattern</strong> on the JSFX, then press
+                            Play.</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ============ LIBRARY TAB ============ -->
+        <main class="main-grid tab-content" id="tabLibrary" style="display:none">
+            <section class="panel library-panel" style="grid-column: 1 / -1">
+                <div class="panel-header">
+                    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                        </svg>Pattern Library</h2>
+                    <div class="library-filters">
+                        <select id="libFilterCategory" class="lib-filter-select">
+                            <option value="All">All Categories</option>
+                        </select>
+                        <label class="lib-fav-filter"><input type="checkbox" id="libFilterFavorites"> ★
+                            Favorites</label>
+                        <button class="lib-btn-folder" id="btnOpenDataFolder" title="Open REAPER Data folder (patterns &amp; MIDI files)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                            </svg>
+                            Data Folder
+                        </button>
+                        <button class="lib-btn-folder" id="btnOpenLibFolder" title="Open Pattern Library folder">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                            </svg>
+                            Library Folder
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="library-grid" id="libraryGrid">
+                        <div class="library-empty">No patterns saved yet. Generate a pattern to get started!</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Settings</h2><button class="btn-close" id="btnCloseSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label for="settingProvider">LLM Provider</label>
+                    <select id="settingProvider">
+                        <option value="gemini">Google Gemini (Free Tier)</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="claude">Anthropic Claude</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="settingGeminiKey">Gemini API Key</label><input type="password"
+                        id="settingGeminiKey" placeholder="AIza..."><small>Free at <a href="https://aistudio.google.com"
+                            target="_blank">aistudio.google.com</a></small></div>
+                <div class="form-group"><label for="settingOpenAIKey">OpenAI API Key (optional)</label><input
+                        type="password" id="settingOpenAIKey" placeholder="sk-..."></div>
+                <div class="form-group"><label for="settingClaudeKey">Claude API Key (optional)</label><input
+                        type="password" id="settingClaudeKey" placeholder="sk-ant-..."><small>Get at <a href="https://console.anthropic.com"
+                            target="_blank">console.anthropic.com</a></small></div>
+                <hr style="border-color: var(--glass-border); margin: 14px 0 10px;">
+                <div class="form-group">
+                    <label>Default Providers (for new prompts)</label>
+                    <div class="settings-provider-defaults">
+                        <label class="provider-toggle" title="Google Gemini">
+                            <input type="checkbox" id="settingDefGemini" value="gemini">
+                            <span class="provider-chip gemini-chip">Gemini</span>
+                        </label>
+                        <label class="provider-toggle" title="OpenAI GPT">
+                            <input type="checkbox" id="settingDefOpenAI" value="openai">
+                            <span class="provider-chip openai-chip">OpenAI</span>
+                        </label>
+                        <label class="provider-toggle" title="Anthropic Claude">
+                            <input type="checkbox" id="settingDefClaude" value="claude">
+                            <span class="provider-chip claude-chip">Claude</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group compact">
+                    <label for="settingDefIterations">Default Variations</label>
+                    <select id="settingDefIterations">
+                        <option value="1" selected>1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <button class="btn-save" id="btnSaveSettings">Save Settings</button>
+                <hr style="border-color: var(--glass-border); margin: 16px 0 12px;">
+                <button class="btn-stop-server" id="btnStopServer" title="Shut down the background server process">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6"/>
+                    </svg>
+                    Stop Server
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div class="modal-overlay" id="renameModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Rename Pattern</h2><button class="btn-close" id="btnCloseRename">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label for="renameInput">Pattern Name</label><input type="text" id="renameInput"
+                        placeholder="Enter a name..."></div>
+                <input type="hidden" id="renamePatternId">
+                <button class="btn-save" id="btnSaveRename">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Set Category</h2><button class="btn-close" id="btnCloseCategory">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label for="categorySelect">Category</label><select
+                        id="categorySelect"></select></div>
+                <div class="form-group"><label for="categoryNewInput">Or create new</label><input type="text"
+                        id="categoryNewInput" placeholder="New category name..."></div>
+                <input type="hidden" id="categoryPatternId">
+                <button class="btn-save" id="btnSaveCategory">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

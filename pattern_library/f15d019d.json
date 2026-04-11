@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "id": "f15d019d",
+    "name": "Codeine Crazy Arpeggio (C# Minor)",
+    "prompt": "cover 'codeine crazy' by future",
+    "category": "Uncategorized",
+    "favorite": false,
+    "created_at": 1775889692.2516658,
+    "updated_at": 1775889692.2516658,
+    "key_root": 61,
+    "scale_name": "C# natural minor",
+    "time_sig": "4/4",
+    "loop_length_beats": 32.0,
+    "bpm_suggestion": 135,
+    "num_events": 24
+  },
+  "pattern": {
+    "pattern_name": "Codeine Crazy Arpeggio (C# Minor)",
+    "key_root": 61,
+    "scale_name": "C# natural minor",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 32.0,
+    "bpm_suggestion": 135,
+    "events": [
+      {
+        "beat": 0,
+        "note": 61,
+        "velocity": 110,
+        "duration": 1.5
+      },
+      {
+        "beat": 1.5,
+        "note": 68,
+        "velocity": 90,
+        "duration": 1.0
+      },
+      {
+        "beat": 2.75,
+        "note": 64,
+        "velocity": 85,
+        "duration": 0.75
+      },
+      {
+        "beat": 4.0,
+        "note": 73,
+        "velocity": 115,
+        "duration": 1.5
+      },
+      {
+        "beat": 5.5,
+        "note": 68,
+        "velocity": 95,
+        "duration": 1.0
+      },
+      {
+        "beat": 6.75,
+        "note": 64,
+        "velocity": 90,
+        "duration": 0.75
+      },
+      {
+        "beat": 8.0,
+        "note": 66,
+        "velocity": 100,
+        "duration": 1.5
+      },
+      {
+        "beat": 9.5,
+        "note": 61,
+        "velocity": 90,
+        "duration": 1.0
+      },
+      {
+        "beat": 10.75,
+        "note": 64,
+        "velocity": 85,
+        "duration": 0.75
+      },
+      {
+        "beat": 12.0,
+        "note": 59,
+        "velocity": 105,
+        "duration": 1.5
+      },
+      {
+        "beat": 13.5,
+        "note": 56,
+        "velocity": 95,
+        "duration": 1.0
+      },
+      {
+        "beat": 14.75,
+        "note": 61,
+        "velocity": 90,
+        "duration": 0.75
+      },
+      {
+        "beat": 16.0,
+        "note": 61,
+        "velocity": 110,
+        "duration": 1.5
+      },
+      {
+        "beat": 17.5,
+        "note": 68,
+        "velocity": 90,
+        "duration": 1.0
+      },
+      {
+        "beat": 18.75,
+        "note": 64,
+        "velocity": 85,
+        "duration": 0.75
+      },
+      {
+        "beat": 20.0,
+        "note": 73,
+        "velocity": 115,
+        "duration": 1.5
+      },
+      {
+        "beat": 21.5,
+        "note": 68,
+        "velocity": 95,
+        "duration": 1.0
+      },
+      {
+        "beat": 22.75,
+        "note": 64,
+        "velocity": 90,
+        "duration": 0.75
+      },
+      {
+        "beat": 24.0,
+        "note": 66,
+        "velocity": 100,
+        "duration": 1.5
+      },
+      {
+        "beat": 25.5,
+        "note": 61,
+        "velocity": 90,
+        "duration": 1.0
+      },
+      {
+        "beat": 26.75,
+        "note": 64,
+        "velocity": 85,
+        "duration": 0.75
+      },
+      {
+        "beat": 28.0,
+        "note": 59,
+        "velocity": 105,
+        "duration": 1.5
+      },
+      {
+        "beat": 29.5,
+        "note": 56,
+        "velocity": 95,
+        "duration": 1.0
+      },
+      {
+        "beat": 30.75,
+        "note": 61,
+        "velocity": 90,
+        "duration": 0.75
+      }
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "id": "182efb26",
+    "name": "Midwest Emo Twinkle Arp (C Major)",
+    "prompt": "Midwest emo guitar twinkles",
+    "category": "Lead",
+    "favorite": false,
+    "created_at": 1775453481.2308805,
+    "updated_at": 1775453481.2308805,
+    "key_root": 60,
+    "scale_name": "Major",
+    "time_sig": "4/4",
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 150,
+    "num_events": 14
+  },
+  "pattern": {
+    "pattern_name": "Midwest Emo Twinkle Arp (C Major)",
+    "key_root": 60,
+    "scale_name": "Major",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 150,
+    "events": [
+      {
+        "beat": 0,
+        "note": 72,
+        "velocity": 110,
+        "duration": 0.75
+      },
+      {
+        "beat": 0.75,
+        "note": 79,
+        "velocity": 95,
+        "duration": 0.5
+      },
+      {
+        "beat": 1.25,
+        "note": 76,
+        "velocity": 100,
+        "duration": 0.75
+      },
+      {
+        "beat": 2.0,
+        "note": 72,
+        "velocity": 90,
+        "duration": 0.5
+      },
+      {
+        "beat": 2.5,
+        "note": 74,
+        "velocity": 105,
+        "duration": 0.5
+      },
+      {
+        "beat": 3.0,
+        "note": 83,
+        "velocity": 115,
+        "duration": 0.75
+      },
+      {
+        "beat": 3.75,
+        "note": 79,
+        "velocity": 90,
+        "duration": 0.5
+      },
+      {
+        "beat": 4.0,
+        "note": 69,
+        "velocity": 100,
+        "duration": 0.75
+      },
+      {
+        "beat": 4.75,
+        "note": 77,
+        "velocity": 95,
+        "duration": 0.5
+      },
+      {
+        "beat": 5.25,
+        "note": 72,
+        "velocity": 100,
+        "duration": 0.75
+      },
+      {
+        "beat": 6.0,
+        "note": 81,
+        "velocity": 110,
+        "duration": 0.5
+      },
+      {
+        "beat": 6.5,
+        "note": 79,
+        "velocity": 95,
+        "duration": 0.5
+      },
+      {
+        "beat": 7.0,
+        "note": 76,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 7.5,
+        "note": 72,
+        "velocity": 120,
+        "duration": 0.5
+      }
+    ]
+  }
+}

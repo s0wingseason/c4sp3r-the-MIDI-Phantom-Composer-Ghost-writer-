@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "id": "0f80cf85",
+    "name": "F Minor Midwest Emo Twinkle Arp",
+    "prompt": "[Modified] make it midwest emo",
+    "category": "Uncategorized",
+    "favorite": false,
+    "created_at": 1775455517.302358,
+    "updated_at": 1775455517.302358,
+    "key_root": 53,
+    "scale_name": "F natural minor",
+    "time_sig": "4/4",
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 130,
+    "num_events": 40
+  },
+  "pattern": {
+    "pattern_name": "F Minor Midwest Emo Twinkle Arp",
+    "key_root": 53,
+    "scale_name": "F natural minor",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 130,
+    "events": [
+      {
+        "beat": 0,
+        "note": 53,
+        "velocity": 105,
+        "duration": 0.18
+      },
+      {
+        "beat": 0.2,
+        "note": 60,
+        "velocity": 75,
+        "duration": 0.08
+      },
+      {
+        "beat": 0.25,
+        "note": 65,
+        "velocity": 95,
+        "duration": 0.18
+      },
+      {
+        "beat": 0.5,
+        "note": 68,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 0.7,
+        "note": 70,
+        "velocity": 80,
+        "duration": 0.08
+      },
+      {
+        "beat": 0.75,
+        "note": 72,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 1.0,
+        "note": 75,
+        "velocity": 115,
+        "duration": 0.22
+      },
+      {
+        "beat": 1.25,
+        "note": 72,
+        "velocity": 88,
+        "duration": 0.18
+      },
+      {
+        "beat": 1.5,
+        "note": 70,
+        "velocity": 83,
+        "duration": 0.18
+      },
+      {
+        "beat": 1.75,
+        "note": 67,
+        "velocity": 78,
+        "duration": 0.18
+      },
+      {
+        "beat": 2.0,
+        "note": 53,
+        "velocity": 105,
+        "duration": 0.18
+      },
+      {
+        "beat": 2.2,
+        "note": 60,
+        "velocity": 75,
+        "duration": 0.08
+      },
+      {
+        "beat": 2.25,
+        "note": 65,
+        "velocity": 95,
+        "duration": 0.18
+      },
+      {
+        "beat": 2.5,
+        "note": 68,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 2.7,
+        "note": 70,
+        "velocity": 80,
+        "duration": 0.08
+      },
+      {
+        "beat": 2.75,
+        "note": 72,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 3.0,
+        "note": 75,
+        "velocity": 115,
+        "duration": 0.22
+      },
+      {
+        "beat": 3.25,
+        "note": 72,
+        "velocity": 88,
+        "duration": 0.18
+      },
+      {
+        "beat": 3.5,
+        "note": 70,
+        "velocity": 83,
+        "duration": 0.18
+      },
+      {
+        "beat": 3.75,
+        "note": 67,
+        "velocity": 78,
+        "duration": 0.18
+      },
+      {
+        "beat": 4.0,
+        "note": 53,
+        "velocity": 105,
+        "duration": 0.18
+      },
+      {
+        "beat": 4.2,
+        "note": 60,
+        "velocity": 75,
+        "duration": 0.08
+      },
+      {
+        "beat": 4.25,
+        "note": 65,
+        "velocity": 95,
+        "duration": 0.18
+      },
+      {
+        "beat": 4.5,
+        "note": 68,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 4.7,
+        "note": 70,
+        "velocity": 80,
+        "duration": 0.08
+      },
+      {
+        "beat": 4.75,
+        "note": 72,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 5.0,
+        "note": 75,
+        "velocity": 115,
+        "duration": 0.22
+      },
+      {
+        "beat": 5.25,
+        "note": 72,
+        "velocity": 88,
+        "duration": 0.18
+      },
+      {
+        "beat": 5.5,
+        "note": 70,
+        "velocity": 83,
+        "duration": 0.18
+      },
+      {
+        "beat": 5.75,
+        "note": 67,
+        "velocity": 78,
+        "duration": 0.18
+      },
+      {
+        "beat": 6.0,
+        "note": 53,
+        "velocity": 105,
+        "duration": 0.18
+      },
+      {
+        "beat": 6.2,
+        "note": 60,
+        "velocity": 75,
+        "duration": 0.08
+      },
+      {
+        "beat": 6.25,
+        "note": 65,
+        "velocity": 95,
+        "duration": 0.18
+      },
+      {
+        "beat": 6.5,
+        "note": 68,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 6.7,
+        "note": 70,
+        "velocity": 80,
+        "duration": 0.08
+      },
+      {
+        "beat": 6.75,
+        "note": 72,
+        "velocity": 90,
+        "duration": 0.18
+      },
+      {
+        "beat": 7.0,
+        "note": 75,
+        "velocity": 115,
+        "duration": 0.22
+      },
+      {
+        "beat": 7.25,
+        "note": 72,
+        "velocity": 88,
+        "duration": 0.18
+      },
+      {
+        "beat": 7.5,
+        "note": 70,
+        "velocity": 83,
+        "duration": 0.18
+      },
+      {
+        "beat": 7.75,
+        "note": 67,
+        "velocity": 78,
+        "duration": 0.18
+      }
+    ]
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "id": "c1dbe69b",
+    "name": "Somber Math Rock Synth Lead",
+    "prompt": "melodic midwest emo and math rock synth lead, somber, emotional",
+    "category": "Uncategorized",
+    "favorite": false,
+    "created_at": 1775889467.0503314,
+    "updated_at": 1775889467.0503314,
+    "key_root": 64,
+    "scale_name": "E natural minor",
+    "time_sig": "4/4",
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 145,
+    "num_events": 16
+  },
+  "pattern": {
+    "pattern_name": "Somber Math Rock Synth Lead",
+    "key_root": 64,
+    "scale_name": "E natural minor",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 8.0,
+    "bpm_suggestion": 145,
+    "events": [
+      {
+        "beat": 0,
+        "note": 64,
+        "velocity": 110,
+        "duration": 0.75
+      },
+      {
+        "beat": 0.75,
+        "note": 67,
+        "velocity": 95,
+        "duration": 0.25
+      },
+      {
+        "beat": 1.0,
+        "note": 71,
+        "velocity": 105,
+        "duration": 0.75
+      },
+      {
+        "beat": 1.75,
+        "note": 74,
+        "velocity": 90,
+        "duration": 0.25
+      },
+      {
+        "beat": 2.0,
+        "note": 76,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 2.5,
+        "note": 72,
+        "velocity": 90,
+        "duration": 0.5
+      },
+      {
+        "beat": 3.0,
+        "note": 69,
+        "velocity": 95,
+        "duration": 0.5
+      },
+      {
+        "beat": 3.5,
+        "note": 67,
+        "velocity": 85,
+        "duration": 0.5
+      },
+      {
+        "beat": 4.0,
+        "note": 66,
+        "velocity": 100,
+        "duration": 0.75
+      },
+      {
+        "beat": 4.75,
+        "note": 74,
+        "velocity": 90,
+        "duration": 0.25
+      },
+      {
+        "beat": 5.0,
+        "note": 71,
+        "velocity": 105,
+        "duration": 0.5
+      },
+      {
+        "beat": 5.5,
+        "note": 76,
+        "velocity": 95,
+        "duration": 0.5
+      },
+      {
+        "beat": 6.0,
+        "note": 79,
+        "velocity": 110,
+        "duration": 0.5
+      },
+      {
+        "beat": 6.5,
+        "note": 74,
+        "velocity": 90,
+        "duration": 0.5
+      },
+      {
+        "beat": 7.0,
+        "note": 71,
+        "velocity": 95,
+        "duration": 0.5
+      },
+      {
+        "beat": 7.5,
+        "note": 64,
+        "velocity": 100,
+        "duration": 0.5
+      }
+    ]
+  }
+}

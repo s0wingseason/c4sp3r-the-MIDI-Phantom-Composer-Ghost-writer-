@@ -1,0 +1,588 @@
+desc:FalconEYE AI Arpeggio Generator
+tags: instrument midi generator
+// FalconEYE AI Arpeggio Generator for REAPER
+// Two modes:
+//   Generator: Plays AI-generated patterns from file as MIDI output
+//   Arpeggiator: Captures held MIDI notes and applies the AI rhythm pattern
+//
+// Pattern file format (AI_Arpeggio_pattern_data.txt):
+//   Line 1: num_events loop_length_beats bpm key_root
+//   Lines 2+: beat_pos note velocity duration_beats
+//
+// (c) 2026 FalconEYE Software Dev
+
+// ---------------------------------------------------------------------------
+// SLIDERS
+// ---------------------------------------------------------------------------
+slider1:mode=0<0,1,1{Generator,Arpeggiator}>Mode
+slider2:midi_ch=0<0,15,1{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}>MIDI Channel
+slider3:vel_scale=100<0,200,1>Velocity Scale (%)
+slider4:oct_offset=0<-3,3,1>Octave Offset
+slider5:gate_pct=100<10,200,1>Gate Length (%)
+slider6:loop_on=1<0,1,1{Off,On}>Loop
+slider7:reload_trig=0<0,1,1{-,Reload Pattern}>Reload Pattern
+slider8:swing_pct=0<-50,50,1>Swing (%)
+slider9:transpose=0<-24,24,1>Transpose (semitones)
+slider10:arp_order=0<0,3,1{As Played,Up,Down,Up-Down}>Arp Note Order
+slider11:arp_octaves=1<1,4,1>Arp Octave Spread
+
+filename:0,AI_Arpeggio_pattern_data.txt
+
+// ---------------------------------------------------------------------------
+// @init
+// ---------------------------------------------------------------------------
+@init
+
+MAX_EVENTS = 2048;
+MAX_HELD = 32;
+NOTE_ON = 0x90;
+NOTE_OFF = 0x80;
+
+// Memory layout — pattern data
+mem_beat   = 0;
+mem_note   = MAX_EVENTS;
+mem_vel    = MAX_EVENTS * 2;
+mem_dur    = MAX_EVENTS * 3;
+
+// Active note-off tracking
+mem_noff_pos  = MAX_EVENTS * 4;
+mem_noff_note = MAX_EVENTS * 5;
+mem_noff_ch   = MAX_EVENTS * 6;
+
+// Held input notes (for arpeggiator mode)
+mem_held_notes = MAX_EVENTS * 7;    // note numbers
+mem_held_vel   = MAX_EVENTS * 7 + MAX_HELD;  // velocities
+mem_held_order = MAX_EVENTS * 7 + MAX_HELD * 2; // sorted notes for arp
+
+num_events = 0;
+loop_len_beats = 4;
+pattern_loaded = 0;
+last_play_state = 0;
+prev_beat_pos = -1;
+num_active_noffs = 0;
+pattern_key = 0;
+pattern_bpm = 120;
+generation_id = 0;
+num_held = 0;
+arp_step = 0;
+arp_direction = 1; // 1 = up, -1 = down (for up-down mode)
+last_block_beat = -1;
+pattern_type = 0; // 0 = melodic, 1 = drums, 2 = chords
+
+// Display strings
+gfx_status = 100;
+strcpy(gfx_status, "Waiting for pattern...");
+
+function load_pattern_file() local(handle, val, i, hdr_events, hdr_loop, hdr_bpm, hdr_key, hdr_type)
+(
+  handle = file_open(0);
+  handle >= 0 ? (
+    file_avail(handle) ? (
+      file_var(handle, hdr_events);
+      file_var(handle, hdr_loop);
+      file_var(handle, hdr_bpm);
+      file_var(handle, hdr_key);
+      // Read optional 5th header value: type (0=melodic, 1=drums, 2=chords)
+      file_avail(handle) ? (
+        file_var(handle, hdr_type);
+        pattern_type = hdr_type;
+      ) : (
+        pattern_type = 0;
+      );
+
+      num_events = min(hdr_events, MAX_EVENTS);
+      loop_len_beats = max(hdr_loop, 0.25);
+      pattern_bpm = hdr_bpm;
+      pattern_key = hdr_key;
+
+      i = 0;
+      while (i < num_events && file_avail(handle)) (
+        file_var(handle, val); mem_beat[i] = val;
+        file_var(handle, val); mem_note[i] = val;
+        file_var(handle, val); mem_vel[i] = val;
+        file_var(handle, val); mem_dur[i] = val;
+        i += 1;
+      );
+      num_events = i;
+      pattern_loaded = num_events > 0;
+      pattern_loaded ? (
+        strcpy(gfx_status, "Pattern loaded!");
+        generation_id += 1;
+      ) : (
+        strcpy(gfx_status, "Empty pattern file");
+      );
+    );
+    file_close(handle);
+  ) : (
+    pattern_loaded = 0;
+    strcpy(gfx_status, "No pattern file found");
+  );
+  num_active_noffs = 0;
+  arp_step = 0;
+);
+
+// Sort held notes for arpeggiator (insertion sort, small N)
+function sort_held_notes() local(i, j, tmp_n, tmp_v)
+(
+  // Copy to order array
+  i = 0;
+  while (i < num_held) (
+    mem_held_order[i] = mem_held_notes[i];
+    i += 1;
+  );
+
+  // Sort ascending (for Up order)
+  i = 1;
+  while (i < num_held) (
+    tmp_n = mem_held_order[i];
+    j = i - 1;
+    while (j >= 0 && mem_held_order[j] > tmp_n) (
+      mem_held_order[j + 1] = mem_held_order[j];
+      j -= 1;
+    );
+    mem_held_order[j + 1] = tmp_n;
+    i += 1;
+  );
+);
+
+// Get the next arp note based on order mode
+function get_arp_note() local(total_notes, oct, idx, note)
+(
+  total_notes = num_held * arp_octaves;
+  total_notes <= 0 ? (
+    60 // fallback
+  ) : (
+    // Determine index based on arp_order
+    arp_order == 0 ? ( // As Played — use original order
+      idx = arp_step % num_held;
+      oct = floor(arp_step / num_held) % arp_octaves;
+      note = mem_held_notes[idx] + oct * 12;
+    ) : arp_order == 1 ? ( // Up — sorted ascending
+      idx = arp_step % num_held;
+      oct = floor(arp_step / num_held) % arp_octaves;
+      note = mem_held_order[idx] + oct * 12;
+    ) : arp_order == 2 ? ( // Down — sorted descending
+      idx = (num_held - 1) - (arp_step % num_held);
+      oct = (arp_octaves - 1) - (floor(arp_step / num_held) % arp_octaves);
+      note = mem_held_order[idx] + oct * 12;
+    ) : ( // Up-Down
+      total_notes > 1 ? (
+        // Ping-pong: 0..n-1, n-2..1, 0..n-1, ...
+        cycle_len = (total_notes - 1) * 2;
+        pos = arp_step % cycle_len;
+        pos >= total_notes ? pos = cycle_len - pos;
+        idx = pos % num_held;
+        oct = floor(pos / num_held) % arp_octaves;
+        note = mem_held_order[idx] + oct * 12;
+      ) : (
+        note = mem_held_order[0];
+      );
+    );
+    note;
+  );
+);
+
+load_pattern_file();
+
+// ---------------------------------------------------------------------------
+// @slider
+// ---------------------------------------------------------------------------
+@slider
+reload_trig == 1 ? (
+  load_pattern_file();
+  reload_trig = 0;
+  sliderchange(reload_trig);
+);
+
+// ---------------------------------------------------------------------------
+// @block — Main MIDI engine
+// ---------------------------------------------------------------------------
+@block
+
+cur_play_state = play_state;
+cur_beat = beat_position;
+cur_tempo = tempo;
+block_beats = samplesblock * cur_tempo / (srate * 60);
+
+// ---- TRANSPORT STOP: kill all notes ----
+(cur_play_state == 0 || cur_play_state == 2) && last_play_state == 1 ? (
+  i = 0;
+  while (i < num_active_noffs) (
+    midisend(0, NOTE_OFF | (mem_noff_ch[i] & 0x0F), mem_noff_note[i], 0);
+    i += 1;
+  );
+  num_active_noffs = 0;
+  prev_beat_pos = -1;
+  arp_step = 0;
+);
+last_play_state = cur_play_state;
+
+// ---- ARPEGGIATOR MODE: capture incoming MIDI ----
+mode == 1 ? (
+  while (midirecv(ts, msg1, msg23)) (
+    msg_type = msg1 & 0xF0;
+    msg_ch = msg1 & 0x0F;
+    msg_note = msg23 & 0x7F;
+    msg_vel = (msg23 >> 8) & 0x7F;
+
+    msg_type == NOTE_ON && msg_vel > 0 ? (
+      // Add to held notes (if not already held)
+      found = 0;
+      i = 0;
+      while (i < num_held && !found) (
+        mem_held_notes[i] == msg_note ? found = 1;
+        i += 1;
+      );
+      !found && num_held < MAX_HELD ? (
+        mem_held_notes[num_held] = msg_note;
+        mem_held_vel[num_held] = msg_vel;
+        num_held += 1;
+        sort_held_notes();
+      );
+    ) : (msg_type == NOTE_OFF || (msg_type == NOTE_ON && msg_vel == 0)) ? (
+      // Remove from held notes
+      i = 0;
+      while (i < num_held) (
+        mem_held_notes[i] == msg_note ? (
+          // Shift remaining
+          j = i;
+          while (j < num_held - 1) (
+            mem_held_notes[j] = mem_held_notes[j + 1];
+            mem_held_vel[j] = mem_held_vel[j + 1];
+            j += 1;
+          );
+          num_held -= 1;
+          sort_held_notes();
+          i = num_held; // break
+        ) : (
+          i += 1;
+        );
+      );
+      // Reset arp step if no notes held
+      num_held == 0 ? arp_step = 0;
+    ) : (
+      // Pass through other MIDI (CC, pitch bend, etc.)
+      midisend(ts, msg1, msg23);
+    );
+  );
+) : (
+  // GENERATOR MODE: pass through all incoming MIDI
+  while (midirecv(ts, msg1, msg23)) (
+    midisend(ts, msg1, msg23);
+  );
+);
+
+// ---- PLAY PATTERN (both modes) ----
+(cur_play_state == 1 || cur_play_state == 5) && pattern_loaded && num_events > 0 ? (
+
+  // In arpeggiator mode, only play when notes are held
+  should_play = mode == 0 || (mode == 1 && num_held > 0);
+
+  should_play ? (
+    block_start_beat = cur_beat;
+    block_end_beat = cur_beat + block_beats;
+
+    loop_on ? (
+      pat_start = block_start_beat - floor(block_start_beat / loop_len_beats) * loop_len_beats;
+      pat_end = pat_start + block_beats;
+    ) : (
+      pat_start = block_start_beat;
+      pat_end = block_end_beat;
+    );
+
+    // ---- NOTE-ONS ----
+    i = 0;
+    while (i < num_events) (
+      evt_beat = mem_beat[i];
+
+      // Swing
+      swing_pct != 0 ? (
+        eighth = floor(evt_beat * 2);
+        (eighth % 2 == 1) ? (
+          evt_beat += swing_pct * 0.01 * 0.5;
+        );
+      );
+
+      // Window check
+      evt_in_window = 0;
+      loop_on ? (
+        (evt_beat >= pat_start && evt_beat < pat_end) ? evt_in_window = 1;
+        pat_end > loop_len_beats ? (
+          wrapped_end = pat_end - loop_len_beats;
+          (evt_beat >= 0 && evt_beat < wrapped_end) ? evt_in_window = 1;
+        );
+      ) : (
+        (evt_beat >= pat_start && evt_beat < pat_end) ? evt_in_window = 1;
+      );
+
+      evt_in_window ? (
+        offset_beats = evt_beat - pat_start;
+        offset_beats < 0 ? offset_beats += loop_len_beats;
+        sample_offset = floor(offset_beats / block_beats * samplesblock);
+        sample_offset = max(0, min(sample_offset, samplesblock - 1));
+
+        // Determine output note
+        mode == 0 ? (
+          // Generator: use pattern notes directly
+          pattern_type == 1 ? (
+            // Drums: notes are absolute GM percussion, no transpose
+            out_note = mem_note[i];
+          ) : (
+            out_note = mem_note[i] + oct_offset * 12 + transpose;
+          );
+        ) : (
+          // Arpeggiator: use held notes with pattern rhythm (disabled for drums)
+          pattern_type == 1 ? (
+            out_note = mem_note[i]; // Drums: always use pattern note
+          ) : (
+            out_note = get_arp_note() + oct_offset * 12 + transpose;
+            arp_step += 1;
+          );
+        );
+        out_note = max(0, min(127, out_note));
+
+        // Velocity: blend pattern velocity with input velocity (arp mode)
+        mode == 0 ? (
+          out_vel = floor(mem_vel[i] * vel_scale / 100);
+        ) : (
+          // Average of pattern vel and held note vel
+          avg_vel = num_held > 0 ? mem_held_vel[arp_step % num_held] : 100;
+          out_vel = floor(((mem_vel[i] + avg_vel) / 2) * vel_scale / 100);
+        );
+        out_vel = max(1, min(127, out_vel));
+
+        out_dur = mem_dur[i] * gate_pct / 100;
+
+        // Send Note On — drums always use channel 9 (MIDI ch 10)
+        pattern_type == 1 ? (
+          midisend(sample_offset, NOTE_ON | 9, out_note, out_vel);
+        ) : (
+          midisend(sample_offset, NOTE_ON | (midi_ch & 0x0F), out_note, out_vel);
+        );
+
+        // Schedule Note Off
+        num_active_noffs < MAX_EVENTS ? (
+          mem_noff_pos[num_active_noffs] = cur_beat + offset_beats / block_beats * block_beats + out_dur;
+          mem_noff_note[num_active_noffs] = out_note;
+          mem_noff_ch[num_active_noffs] = pattern_type == 1 ? 9 : midi_ch;
+          num_active_noffs += 1;
+        );
+      );
+
+      i += 1;
+    );
+
+    // Reset arp step on loop boundary
+    mode == 1 && loop_on ? (
+      pat_end > loop_len_beats ? arp_step = 0;
+    );
+  );
+
+  // ---- NOTE-OFFS ----
+  i = 0;
+  while (i < num_active_noffs) (
+    mem_noff_pos[i] <= block_end_beat ? (
+      off_offset_beats = mem_noff_pos[i] - block_start_beat;
+      off_sample = floor(off_offset_beats / block_beats * samplesblock);
+      off_sample = max(0, min(off_sample, samplesblock - 1));
+      midisend(off_sample, NOTE_OFF | (mem_noff_ch[i] & 0x0F), mem_noff_note[i], 0);
+      num_active_noffs -= 1;
+      mem_noff_pos[i] = mem_noff_pos[num_active_noffs];
+      mem_noff_note[i] = mem_noff_note[num_active_noffs];
+      mem_noff_ch[i] = mem_noff_ch[num_active_noffs];
+    ) : (
+      i += 1;
+    );
+  );
+
+  prev_beat_pos = cur_beat;
+);
+
+
+// ---------------------------------------------------------------------------
+// @gfx — Visual display
+// ---------------------------------------------------------------------------
+@gfx 520 380
+
+// Background
+gfx_r = 0.08; gfx_g = 0.08; gfx_b = 0.12;
+gfx_rect(0, 0, gfx_w, gfx_h);
+
+// Title bar
+gfx_r = 0.15; gfx_g = 0.05; gfx_b = 0.30;
+gfx_rect(0, 0, gfx_w, 44);
+gfx_r = 0.20; gfx_g = 0.08; gfx_b = 0.40;
+gfx_rect(0, 40, gfx_w, 4);
+
+gfx_r = 0.95; gfx_g = 0.85; gfx_b = 1.0;
+gfx_setfont(1, "Arial", 18, 'b');
+gfx_x = 12; gfx_y = 12;
+gfx_drawstr("FalconEYE AI Arpeggio Generator");
+
+// Mode indicator
+gfx_setfont(2, "Arial", 13);
+gfx_x = 16; gfx_y = 56;
+mode == 0 ? (
+  gfx_r = 0.2; gfx_g = 0.7; gfx_b = 1.0;
+  gfx_drawstr("◆ Generator Mode");
+) : (
+  gfx_r = 1.0; gfx_g = 0.7; gfx_b = 0.2;
+  gfx_drawstr("◆ Arpeggiator Mode");
+  gfx_r = 0.6; gfx_g = 0.5; gfx_b = 0.4;
+  gfx_drawstr("  |  Held: ");
+  gfx_drawnumber(num_held, 0);
+  gfx_drawstr(" notes");
+);
+
+// Pattern type indicator
+gfx_x = gfx_w - 120; gfx_y = 56;
+pattern_type == 1 ? (
+  gfx_r = 1.0; gfx_g = 0.62; gfx_b = 0.04;
+  gfx_drawstr("[DRUMS]");
+) : pattern_type == 2 ? (
+  gfx_r = 0.13; gfx_g = 0.83; gfx_b = 0.93;
+  gfx_drawstr("[CHORDS]");
+) : (
+  gfx_r = 0.66; gfx_g = 0.33; gfx_b = 0.97;
+  gfx_drawstr("[MELODIC]");
+);
+
+// Status
+gfx_x = 16; gfx_y = 76;
+pattern_loaded ? (
+  gfx_r = 0.2; gfx_g = 0.9; gfx_b = 0.4;
+  gfx_drawstr("● ");
+  gfx_r = 0.7; gfx_g = 0.8; gfx_b = 0.7;
+  gfx_drawstr("Pattern Active");
+) : (
+  gfx_r = 0.9; gfx_g = 0.3; gfx_b = 0.2;
+  gfx_drawstr("● ");
+  gfx_r = 0.7; gfx_g = 0.5; gfx_b = 0.5;
+  gfx_drawstr("No Pattern");
+);
+
+// Divider
+gfx_r = 0.2; gfx_g = 0.15; gfx_b = 0.3;
+gfx_rect(16, 98, gfx_w - 32, 1);
+
+// Info
+gfx_setfont(3, "Arial", 12);
+gfx_r = 0.5; gfx_g = 0.4; gfx_b = 0.6;
+gfx_x = 16; gfx_y = 108;
+gfx_drawstr("EVENTS:");
+gfx_r = 0.9; gfx_g = 0.9; gfx_b = 1.0;
+gfx_x = 90; gfx_y = 108;
+gfx_drawnumber(num_events, 0);
+
+gfx_r = 0.5; gfx_g = 0.4; gfx_b = 0.6;
+gfx_x = 16; gfx_y = 128;
+gfx_drawstr("LOOP LEN:");
+gfx_r = 0.9; gfx_g = 0.9; gfx_b = 1.0;
+gfx_x = 90; gfx_y = 128;
+gfx_drawnumber(loop_len_beats, 1);
+gfx_drawstr(" beats");
+
+gfx_r = 0.5; gfx_g = 0.4; gfx_b = 0.6;
+gfx_x = 16; gfx_y = 148;
+gfx_drawstr("GEN ID:");
+gfx_r = 0.9; gfx_g = 0.9; gfx_b = 1.0;
+gfx_x = 90; gfx_y = 148;
+gfx_drawnumber(generation_id, 0);
+
+// Transport
+gfx_r = 0.2; gfx_g = 0.15; gfx_b = 0.3;
+gfx_rect(16, 170, gfx_w - 32, 1);
+
+gfx_r = 0.5; gfx_g = 0.4; gfx_b = 0.6;
+gfx_x = 16; gfx_y = 180;
+gfx_drawstr("BEAT POS:");
+gfx_r = 0.9; gfx_g = 0.85; gfx_b = 0.6;
+gfx_x = 90; gfx_y = 180;
+play_state == 1 || play_state == 5 ? (
+  loop_on ? (
+    display_beat = beat_position - floor(beat_position / loop_len_beats) * loop_len_beats;
+  ) : (
+    display_beat = beat_position;
+  );
+  gfx_drawnumber(display_beat, 2);
+) : (
+  gfx_drawstr("Stopped");
+);
+
+// Mini piano-roll
+gfx_r = 0.2; gfx_g = 0.15; gfx_b = 0.3;
+gfx_rect(16, 206, gfx_w - 32, 1);
+
+gfx_r = 0.5; gfx_g = 0.4; gfx_b = 0.6;
+gfx_setfont(3, "Arial", 11);
+gfx_x = 16; gfx_y = 214;
+gfx_drawstr("PATTERN PREVIEW");
+
+pattern_loaded && num_events > 0 ? (
+  min_note = 127; max_note = 0;
+  i = 0;
+  while (i < num_events) (
+    mem_note[i] < min_note ? min_note = mem_note[i];
+    mem_note[i] > max_note ? max_note = mem_note[i];
+    i += 1;
+  );
+  note_range = max(max_note - min_note, 1);
+
+  roll_x = 16; roll_y = 232;
+  roll_w = gfx_w - 32; roll_h = 110;
+
+  gfx_r = 0.06; gfx_g = 0.06; gfx_b = 0.1;
+  gfx_rect(roll_x, roll_y, roll_w, roll_h);
+
+  // Grid
+  gfx_r = 0.12; gfx_g = 0.10; gfx_b = 0.18;
+  grid_i = 1;
+  while (grid_i < loop_len_beats) (
+    gx = roll_x + (grid_i / loop_len_beats) * roll_w;
+    gfx_rect(gx, roll_y, 1, roll_h);
+    grid_i += 1;
+  );
+
+  // Notes
+  i = 0;
+  while (i < num_events) (
+    nx = roll_x + (mem_beat[i] / loop_len_beats) * roll_w;
+    nw = max((mem_dur[i] / loop_len_beats) * roll_w, 2);
+    ny = roll_y + roll_h - ((mem_note[i] - min_note) / note_range) * (roll_h - 6) - 3;
+    nh = max(3, roll_h / (note_range + 1));
+    nh = min(nh, 8);
+    v_ratio = mem_vel[i] / 127;
+    gfx_r = 0.3 + 0.5 * v_ratio;
+    gfx_g = 0.2 + 0.3 * (1 - v_ratio);
+    gfx_b = 0.7 + 0.3 * v_ratio;
+    gfx_a = 0.85;
+    gfx_rect(nx, ny, nw, nh);
+    i += 1;
+  );
+
+  // Playhead
+  (play_state == 1 || play_state == 5) ? (
+    loop_on ? (
+      ph_pos = beat_position - floor(beat_position / loop_len_beats) * loop_len_beats;
+    ) : (
+      ph_pos = beat_position;
+    );
+    ph_x = roll_x + (ph_pos / loop_len_beats) * roll_w;
+    gfx_r = 1.0; gfx_g = 0.9; gfx_b = 0.2; gfx_a = 0.9;
+    gfx_rect(ph_x, roll_y, 2, roll_h);
+  );
+  gfx_a = 1.0;
+) : (
+  gfx_r = 0.3; gfx_g = 0.25; gfx_b = 0.35;
+  gfx_setfont(2, "Arial", 13);
+  gfx_x = gfx_w / 2 - 80; gfx_y = 285;
+  gfx_drawstr("Generate a pattern from the Web UI");
+);
+
+// Footer
+gfx_r = 0.12; gfx_g = 0.08; gfx_b = 0.18;
+gfx_rect(0, gfx_h - 24, gfx_w, 24);
+gfx_r = 0.4; gfx_g = 0.35; gfx_b = 0.5;
+gfx_setfont(4, "Arial", 10);
+gfx_x = 8; gfx_y = gfx_h - 18;
+gfx_drawstr("FalconEYE AI Arpeggio Gen v1.1  |  Web UI: localhost:8765");

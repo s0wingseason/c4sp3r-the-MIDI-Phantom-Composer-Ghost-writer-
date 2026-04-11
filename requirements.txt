@@ -1,0 +1,4 @@
+flask>=3.0
+flask-cors>=4.0
+waitress>=3.0
+flaskwebgui>=1.1

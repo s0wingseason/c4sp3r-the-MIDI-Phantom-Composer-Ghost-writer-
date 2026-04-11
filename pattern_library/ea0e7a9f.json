@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "id": "ea0e7a9f",
+    "name": "Midwest Emo Melodic Minor Progression",
+    "prompt": "midwest emo",
+    "category": "Chord Progressions",
+    "favorite": false,
+    "created_at": 1775891304.0515225,
+    "updated_at": 1775891304.0515225,
+    "type": "chords",
+    "key_root": 60,
+    "scale_name": "C melodic minor",
+    "time_sig": "4/4",
+    "loop_length_beats": 64.0,
+    "bpm_suggestion": 140,
+    "num_events": 25
+  },
+  "pattern": {
+    "pattern_name": "Midwest Emo Melodic Minor Progression",
+    "type": "chords",
+    "key_root": 60,
+    "scale_name": "C melodic minor",
+    "chord_symbols": [
+      "Cm(add9)",
+      "Abmaj7#11",
+      "Fmaj7#11",
+      "Gsus4add9",
+      "G7"
+    ],
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 64.0,
+    "bpm_suggestion": 140,
+    "events": [
+      {
+        "beat": 0,
+        "note": 48,
+        "velocity": 95,
+        "duration": 16.0
+      },
+      {
+        "beat": 0,
+        "note": 55,
+        "velocity": 88,
+        "duration": 16.0
+      },
+      {
+        "beat": 0,
+        "note": 63,
+        "velocity": 85,
+        "duration": 16.0
+      },
+      {
+        "beat": 0,
+        "note": 67,
+        "velocity": 85,
+        "duration": 16.0
+      },
+      {
+        "beat": 0,
+        "note": 74,
+        "velocity": 82,
+        "duration": 16.0
+      },
+      {
+        "beat": 16.0,
+        "note": 56,
+        "velocity": 95,
+        "duration": 16.0
+      },
+      {
+        "beat": 16.0,
+        "note": 60,
+        "velocity": 88,
+        "duration": 16.0
+      },
+      {
+        "beat": 16.0,
+        "note": 63,
+        "velocity": 85,
+        "duration": 16.0
+      },
+      {
+        "beat": 16.0,
+        "note": 67,
+        "velocity": 85,
+        "duration": 16.0
+      },
+      {
+        "beat": 16.0,
+        "note": 74,
+        "velocity": 82,
+        "duration": 16.0
+      },
+      {
+        "beat": 32.0,
+        "note": 53,
+        "velocity": 95,
+        "duration": 16.0
+      },
+      {
+        "beat": 32.0,
+        "note": 60,
+        "velocity": 88,
+        "duration": 16.0
+      },
+      {
+        "beat": 32.0,
+        "note": 64,
+        "velocity": 85,
+        "duration": 16.0
+      },
+      {
+        "beat": 32.0,
+        "note": 69,
+        "velocity": 85,
+        "duration": 16.0
+      },
+      {
+        "beat": 32.0,
+        "note": 71,
+        "velocity": 82,
+        "duration": 16.0
+      },
+      {
+        "beat": 48.0,
+        "note": 55,
+        "velocity": 95,
+        "duration": 8.0
+      },
+      {
+        "beat": 48.0,
+        "note": 60,
+        "velocity": 88,
+        "duration": 8.0
+      },
+      {
+        "beat": 48.0,
+        "note": 62,
+        "velocity": 85,
+        "duration": 8.0
+      },
+      {
+        "beat": 48.0,
+        "note": 69,
+        "velocity": 85,
+        "duration": 8.0
+      },
+      {
+        "beat": 48.0,
+        "note": 74,
+        "velocity": 82,
+        "duration": 8.0
+      },
+      {
+        "beat": 56.0,
+        "note": 55,
+        "velocity": 95,
+        "duration": 8.0
+      },
+      {
+        "beat": 56.0,
+        "note": 59,
+        "velocity": 88,
+        "duration": 8.0
+      },
+      {
+        "beat": 56.0,
+        "note": 62,
+        "velocity": 85,
+        "duration": 8.0
+      },
+      {
+        "beat": 56.0,
+        "note": 65,
+        "velocity": 85,
+        "duration": 8.0
+      },
+      {
+        "beat": 56.0,
+        "note": 74,
+        "velocity": 82,
+        "duration": 8.0
+      }
+    ]
+  }
+}
