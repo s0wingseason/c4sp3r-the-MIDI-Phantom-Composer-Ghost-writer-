@@ -202,6 +202,40 @@
       "loop_length_beats": 96.0,
       "bpm_suggestion": 120,
       "num_events": 32
+    },
+    "7ffacbad": {
+      "id": "7ffacbad",
+      "name": "Midwest Emo Chorus Drumloop",
+      "prompt": "midwest emo chorus drumloop",
+      "category": "Drum Loops",
+      "favorite": false,
+      "created_at": 1775896266.7127662,
+      "updated_at": 1775896266.7127662,
+      "type": "drums",
+      "key_root": 0,
+      "scale_name": "percussion",
+      "time_sig": "4/4",
+      "loop_length_beats": 128.0,
+      "bpm_suggestion": 140,
+      "num_events": 75,
+      "kit_name": "Trap Kit"
+    },
+    "ae13a2b2": {
+      "id": "ae13a2b2",
+      "name": "Midwest Emo Chorus Drumloop",
+      "prompt": "midwest emo chorus drumloop",
+      "category": "Drum Loops",
+      "favorite": false,
+      "created_at": 1775896315.8091917,
+      "updated_at": 1775896315.8091917,
+      "type": "drums",
+      "key_root": 0,
+      "scale_name": "percussion",
+      "time_sig": "4/4",
+      "loop_length_beats": 128.0,
+      "bpm_suggestion": 180,
+      "num_events": 95,
+      "kit_name": "Trap Kit"
     }
   },
   "categories": [

@@ -160,6 +160,23 @@ def get_status():
         return jsonify(generation_status)
 
 
+@app.route("/api/logs")
+def get_logs():
+    """Return the last N lines from the current session log file."""
+    n = min(int(request.args.get("lines", 100)), 500)
+    try:
+        with open(_log_file, "r", encoding="utf-8", errors="replace") as f:
+            lines = f.readlines()
+        tail = lines[-n:] if len(lines) > n else lines
+        return jsonify({
+            "ok": True,
+            "log_file": os.path.basename(_log_file),
+            "total_lines": len(lines),
+            "lines": [l.rstrip() for l in tail],
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e), "lines": []})
+
 @app.route("/api/config", methods=["GET"])
 def get_config():
     config = load_config()
@@ -625,21 +642,6 @@ def open_library_folder():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-# ---- Server Shutdown ----
-
-@app.route("/api/shutdown", methods=["POST"])
-def shutdown_server():
-    """Gracefully shut down the server process."""
-    logger.info("Shutdown requested via API")
-    func = request.environ.get("werkzeug.server.shutdown")
-    if func:
-        func()
-    else:
-        # For non-werkzeug servers, just exit
-        import threading
-        threading.Thread(target=lambda: (time.sleep(0.5), os._exit(0)), daemon=True).start()
-    return jsonify({"ok": True, "message": "Server shutting down..."})
 
 
 # ---- Pattern Library ----

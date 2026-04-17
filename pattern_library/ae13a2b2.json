@@ -1,0 +1,602 @@
+{
+  "meta": {
+    "id": "ae13a2b2",
+    "name": "Midwest Emo Chorus Drumloop",
+    "prompt": "midwest emo chorus drumloop",
+    "category": "Drum Loops",
+    "favorite": false,
+    "created_at": 1775896315.8091917,
+    "updated_at": 1775896315.8091917,
+    "type": "drums",
+    "key_root": 0,
+    "scale_name": "percussion",
+    "time_sig": "4/4",
+    "loop_length_beats": 128.0,
+    "bpm_suggestion": 180,
+    "num_events": 95,
+    "kit_name": "Trap Kit"
+  },
+  "pattern": {
+    "pattern_name": "Midwest Emo Chorus Drumloop",
+    "type": "drums",
+    "kit_name": "Trap Kit",
+    "time_signature_num": 4,
+    "time_signature_den": 4,
+    "loop_length_beats": 128.0,
+    "bpm_suggestion": 180,
+    "events": [
+      {
+        "beat": 0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 0,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 0.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 0.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 0.5,
+        "note": 38,
+        "velocity": 115,
+        "duration": 0.25
+      },
+      {
+        "beat": 0.75,
+        "note": 42,
+        "velocity": 80,
+        "duration": 0.125
+      },
+      {
+        "beat": 1.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 1.0,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 1.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 1.5,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 1.75,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 2.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 2.0,
+        "note": 40,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 2.25,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 2.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 2.5,
+        "note": 39,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 2.75,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 3.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 3.0,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 3.25,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 4.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 4.0,
+        "note": 51,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 4.5,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 5.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 5.0,
+        "note": 38,
+        "velocity": 115,
+        "duration": 0.25
+      },
+      {
+        "beat": 5.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 5.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 5.5,
+        "note": 39,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 5.75,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 6.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 6.0,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 6.25,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 7.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 7.0,
+        "note": 40,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 7.25,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 8.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 8.0,
+        "note": 51,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 8.5,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 9.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 9.0,
+        "note": 38,
+        "velocity": 115,
+        "duration": 0.25
+      },
+      {
+        "beat": 9.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 9.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 9.5,
+        "note": 39,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 9.75,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 10.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 10.0,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 10.25,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 11.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 11.0,
+        "note": 40,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 11.25,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 12.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 12.0,
+        "note": 51,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 12.5,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 13.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 13.0,
+        "note": 38,
+        "velocity": 115,
+        "duration": 0.25
+      },
+      {
+        "beat": 13.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 13.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 13.5,
+        "note": 39,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 13.75,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 14.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 14.0,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 14.25,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 15.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 15.0,
+        "note": 40,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 15.25,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 16.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 16.0,
+        "note": 51,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 16.5,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 17.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 17.0,
+        "note": 38,
+        "velocity": 115,
+        "duration": 0.25
+      },
+      {
+        "beat": 17.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 17.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 17.5,
+        "note": 39,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 17.75,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 18.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 18.0,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 18.25,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 19.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 19.0,
+        "note": 40,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 19.25,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      },
+      {
+        "beat": 20.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 20.0,
+        "note": 51,
+        "velocity": 100,
+        "duration": 0.5
+      },
+      {
+        "beat": 20.5,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 21.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 21.0,
+        "note": 38,
+        "velocity": 115,
+        "duration": 0.25
+      },
+      {
+        "beat": 21.25,
+        "note": 42,
+        "velocity": 100,
+        "duration": 0.125
+      },
+      {
+        "beat": 21.5,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 21.5,
+        "note": 39,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 21.75,
+        "note": 42,
+        "velocity": 85,
+        "duration": 0.125
+      },
+      {
+        "beat": 22.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 22.0,
+        "note": 38,
+        "velocity": 120,
+        "duration": 0.25
+      },
+      {
+        "beat": 22.25,
+        "note": 42,
+        "velocity": 90,
+        "duration": 0.125
+      },
+      {
+        "beat": 23.0,
+        "note": 36,
+        "velocity": 110,
+        "duration": 0.25
+      },
+      {
+        "beat": 23.0,
+        "note": 40,
+        "velocity": 100,
+        "duration": 0.25
+      },
+      {
+        "beat": 23.25,
+        "note": 42,
+        "velocity": 95,
+        "duration": 0.125
+      }
+    ],
+    "key_root": 0,
+    "scale_name": "percussion"
+  }
+}

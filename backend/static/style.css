@@ -1707,3 +1707,133 @@ input[type="number"]:focus {
 .form-group.compact select {
     padding: 6px 10px;
 }
+
+/* ---------- Console Drawer ---------- */
+.console-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: rgba(10, 10, 18, 0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(139, 92, 246, 0.25);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.console-drawer.open {
+    height: 320px;
+}
+
+.console-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(139, 92, 246, 0.08);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+    flex-shrink: 0;
+    cursor: default;
+    min-height: 36px;
+}
+
+.console-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+}
+
+.console-logfile {
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    font-family: var(--font-mono);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.console-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.console-action-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.console-action-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--glass-border);
+}
+
+.console-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 8px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.console-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.console-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.console-body::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+}
+
+.console-output {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: pre;
+    tab-size: 4;
+}
+
+/* Log level color coding */
+.log-line { display: block; }
+.log-line.log-info { color: #8bc5f8; }
+.log-line.log-warning { color: #fbbf24; }
+.log-line.log-error { color: #f87171; }
+.log-line.log-debug { color: #6b7280; }
+.log-line.log-server { color: #a78bfa; }
+
+/* Console toggle button active state */
+#btnToggleConsole.active {
+    color: var(--accent);
+    background: rgba(139, 92, 246, 0.15);
+}
+
+/* When console is open, push body up slightly */
+body.console-open .app-container {
+    padding-bottom: 320px;
+}

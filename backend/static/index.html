@@ -44,6 +44,12 @@
                 <button class="tab" data-tab="library">Library</button>
             </nav>
             <div class="header-actions">
+                <button class="btn-icon" id="btnToggleConsole" title="View Console">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"/>
+                        <line x1="12" y1="19" x2="20" y2="19"/>
+                    </svg>
+                </button>
                 <button class="btn-icon" id="btnSettings" title="Settings">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3" />
@@ -698,6 +704,35 @@
                 <input type="hidden" id="categoryPatternId">
                 <button class="btn-save" id="btnSaveCategory">Save</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Console Drawer -->
+    <div class="console-drawer" id="consoleDrawer">
+        <div class="console-header" id="consoleHeader">
+            <div class="console-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 17 10 11 4 5"/>
+                    <line x1="12" y1="19" x2="20" y2="19"/>
+                </svg>
+                <span>Console</span>
+                <span class="console-logfile" id="consoleLogFile"></span>
+            </div>
+            <div class="console-actions">
+                <button class="console-action-btn" id="btnConsoleClear" title="Clear display">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4h8v2M5 6v14a2 2 0 002 2h10a2 2 0 002-2V6"/>
+                    </svg>
+                </button>
+                <button class="console-action-btn" id="btnConsoleClose" title="Close console">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="console-body" id="consoleBody">
+            <pre class="console-output" id="consoleOutput"></pre>
         </div>
     </div>
 

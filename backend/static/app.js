@@ -798,3 +798,101 @@ async function initApp() {
     setMode('melodic');
 }
 initApp();
+
+// ============================================================
+// Console Drawer
+// ============================================================
+(function() {
+    const drawer = document.getElementById('consoleDrawer');
+    const output = document.getElementById('consoleOutput');
+    const logFileEl = document.getElementById('consoleLogFile');
+    const btnToggle = document.getElementById('btnToggleConsole');
+    const btnClose = document.getElementById('btnConsoleClose');
+    const btnClear = document.getElementById('btnConsoleClear');
+    const body = document.getElementById('consoleBody');
+
+    if (!drawer || !output) return;
+
+    let consolePollId = null;
+    let isOpen = false;
+    let autoScroll = true;
+
+    function classifyLine(line) {
+        if (line.includes('[ERROR]')) return 'log-error';
+        if (line.includes('[WARNING]')) return 'log-warning';
+        if (line.includes('[INFO]')) return 'log-info';
+        if (line.includes('[DEBUG]')) return 'log-debug';
+        if (line.includes('werkzeug') || line.includes('* Running') || line.includes('Press CTRL')) return 'log-server';
+        return '';
+    }
+
+    function renderLogs(lines) {
+        const wasAtBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 30;
+        output.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        for (const line of lines) {
+            const span = document.createElement('span');
+            span.className = 'log-line ' + classifyLine(line);
+            span.textContent = line;
+            frag.appendChild(span);
+            frag.appendChild(document.createTextNode('\n'));
+        }
+        output.appendChild(frag);
+        if (autoScroll && wasAtBottom) {
+            body.scrollTop = body.scrollHeight;
+        }
+    }
+
+    async function fetchLogs() {
+        try {
+            const data = await apiGet('/api/logs?lines=200');
+            if (data.ok !== false) {
+                if (logFileEl) logFileEl.textContent = data.log_file || '';
+                renderLogs(data.lines || []);
+            }
+        } catch (_) { }
+    }
+
+    function openConsole() {
+        isOpen = true;
+        drawer.classList.add('open');
+        document.body.classList.add('console-open');
+        btnToggle.classList.add('active');
+        fetchLogs();
+        consolePollId = setInterval(fetchLogs, 2000);
+    }
+
+    function closeConsole() {
+        isOpen = false;
+        drawer.classList.remove('open');
+        document.body.classList.remove('console-open');
+        btnToggle.classList.remove('active');
+        if (consolePollId) { clearInterval(consolePollId); consolePollId = null; }
+    }
+
+    function toggleConsole() {
+        if (isOpen) closeConsole(); else openConsole();
+    }
+
+    btnToggle.addEventListener('click', toggleConsole);
+    btnClose.addEventListener('click', closeConsole);
+    btnClear.addEventListener('click', () => {
+        output.innerHTML = '';
+    });
+
+    // Track scroll — disable auto-scroll if user scrolls up
+    body.addEventListener('scroll', () => {
+        autoScroll = body.scrollHeight - body.scrollTop - body.clientHeight < 30;
+    });
+
+    // Keyboard shortcut: backtick (`) to toggle console
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '`' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            // Don't trigger when typing in inputs
+            const t = e.target.tagName;
+            if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return;
+            e.preventDefault();
+            toggleConsole();
+        }
+    });
+})();

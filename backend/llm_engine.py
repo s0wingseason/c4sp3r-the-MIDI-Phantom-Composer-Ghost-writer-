@@ -53,8 +53,10 @@ IMPORTANT:
 - "duration" = note length in beats (float)
 - Events MUST be sorted by beat position
 - All events must fit within loop_length_beats
-- Minimum 4 events, maximum 64 events — keep patterns concise and musical
-- For longer loops, use fewer notes with longer durations rather than filling every subdivision"""
+- Minimum 4 events
+- Generate enough events to fill the ENTIRE requested loop_length_beats — do NOT truncate early
+- For longer loops (16+ bars), scale event count accordingly — a 32-bar pattern needs many more events than a 4-bar pattern
+- For longer loops, use musical variation (don't just repeat the same 4 bars)"""
 
 MODIFY_SYSTEM_PROMPT = """You are a professional music composer and MIDI programmer. You will receive an existing MIDI pattern as JSON, along with modification instructions from the user.
 
@@ -137,9 +139,11 @@ IMPORTANT:
 - "duration" = note length in beats (float)
 - Events MUST be sorted by beat position
 - All events must fit within loop_length_beats
-- Minimum 4 events, maximum 128 events
+- Minimum 4 events — generate enough events to fill the ENTIRE requested loop_length_beats
+- For longer loops (16+ bars), scale your event count proportionally — a 32-bar drum loop needs 200-400+ events
 - Multiple simultaneous hits are encouraged (kick+hat, snare+crash, etc.)
-- Think like a real drummer — consistent kick/snare backbone with hi-hat pattern on top"""
+- Think like a real drummer — consistent kick/snare backbone with hi-hat pattern on top
+- Do NOT truncate the pattern early — every bar should have drum activity"""
 
 DRUM_MODIFY_SYSTEM_PROMPT = """You are a professional drummer and MIDI programmer. You will receive an existing drum pattern as JSON, along with modification instructions from the user.
 
@@ -443,7 +447,8 @@ IMPORTANT:
 - Multiple notes at the same "beat" position form a chord
 - Use proper voice leading between chords (minimal movement between voices)
 - Include chord extensions (7ths, 9ths, 11ths) when the style calls for it
-- Minimum 8 events (2+ chords), maximum 96 events
+- Minimum 8 events (2+ chords) — generate enough events to fill the ENTIRE requested loop_length_beats
+- For longer progressions (16+ bars), scale event count accordingly
 - Events MUST be sorted by beat position
 - All events must fit within loop_length_beats"""
 
