@@ -1,6 +1,8 @@
-desc:FalconEYE AI Arpeggio Generator
-tags: instrument midi generator
-// FalconEYE AI Arpeggio Generator for REAPER
+desc:C@sp3r — MIDI Phantom Composer Ghost Writer
+tags: instrument midi generator arrangement
+// C@sp3r: the MIDI Phantom Composer Ghost Writer v1.00
+// by s0wingseason (@Calvin D. Roberts)
+//
 // Two modes:
 //   Generator: Plays AI-generated patterns from file as MIDI output
 //   Arpeggiator: Captures held MIDI notes and applies the AI rhythm pattern
@@ -9,7 +11,7 @@ tags: instrument midi generator
 //   Line 1: num_events loop_length_beats bpm key_root
 //   Lines 2+: beat_pos note velocity duration_beats
 //
-// (c) 2026 FalconEYE Software Dev
+// (c) 2026 s0wingseason / Calvin D. Roberts
 
 // ---------------------------------------------------------------------------
 // SLIDERS
@@ -68,6 +70,11 @@ arp_step = 0;
 arp_direction = 1; // 1 = up, -1 = down (for up-down mode)
 last_block_beat = -1;
 pattern_type = 0; // 0 = melodic, 1 = drums, 2 = chords
+
+// Auto-poll timer (reload pattern file periodically to detect new generations)
+poll_interval_samples = 0; // computed per-block from srate
+poll_counter = 0;
+poll_genid = 0; // track changes
 
 // Display strings
 gfx_status = 100;
@@ -198,6 +205,15 @@ reload_trig == 1 ? (
 // @block — Main MIDI engine
 // ---------------------------------------------------------------------------
 @block
+
+// ---- AUTO-POLL: reload pattern file every ~250ms ----
+poll_interval_samples == 0 ? poll_interval_samples = srate * 0.25;
+poll_counter += samplesblock;
+poll_counter >= poll_interval_samples ? (
+  poll_counter = 0;
+  // Try loading — if generation_id changed, a new pattern arrived
+  load_pattern_file();
+);
 
 cur_play_state = play_state;
 cur_beat = beat_position;

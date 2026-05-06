@@ -4,7 +4,7 @@ Supports Google Gemini (free tier, default) and OpenAI as fallback.
 Uses direct REST API calls to minimize dependencies.
 Supports both melodic arpeggio and drum loop generation modes.
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import json
@@ -533,12 +533,190 @@ def _validate_chord_pattern(data: dict) -> dict:
     return data
 
 
+# ---------------------------------------------------------------------------
+# System prompts — Full Arrangement mode
+# ---------------------------------------------------------------------------
+ARRANGEMENT_SYSTEM_PROMPT = """You are a professional music producer and MIDI programmer. The user will describe a musical style or concept. You must generate a COMPLETE multi-track arrangement as a single JSON object containing coordinated Drums, Bass, Chords, and Melody patterns that work together musically.
+
+RULES:
+1. Return ONLY valid JSON, no markdown, no explanation, no code fences.
+2. Generate 4 coordinated tracks that form a cohesive musical arrangement.
+3. All tracks share the same key, tempo, time signature, and loop length.
+4. Use standard MIDI note numbers (C4 = 60).
+5. Drums use GM percussion mapping (channel 10): Kick=36, Snare=38, HH=42/46, Ride=51, Crash=49.
+6. Bass should be monophonic in octaves 2-3 (MIDI notes 36-59), rhythmically locked to the kick drum.
+7. Chords should use proper voice leading with 3-5 notes per chord, octaves 4-5.
+8. Melody should be a singable lead line in octaves 4-5, with rhythmic variety and phrasing.
+9. Tracks should complementary — melody plays during chord sustained sections, bass locks with kick.
+10. Use velocity dynamics: ghost notes (40-60), normal (80-110), accents (115-127).
+11. Keep it musical — this should sound like a real song section, not random notes.
+
+OUTPUT FORMAT (strict JSON):
+{
+  "arrangement_name": "descriptive name",
+  "key_root": 60,
+  "scale_name": "minor",
+  "time_signature_num": 4,
+  "time_signature_den": 4,
+  "loop_length_beats": 16,
+  "bpm_suggestion": 120,
+  "tracks": {
+    "drums": {
+      "pattern_name": "drum track name",
+      "type": "drums",
+      "kit_name": "Standard Kit",
+      "events": [
+        {"beat": 0.0, "note": 36, "velocity": 110, "duration": 0.25}
+      ]
+    },
+    "bass": {
+      "pattern_name": "bass track name",
+      "type": "melodic",
+      "events": [
+        {"beat": 0.0, "note": 36, "velocity": 100, "duration": 0.5}
+      ]
+    },
+    "chords": {
+      "pattern_name": "chord track name",
+      "type": "chords",
+      "chord_symbols": ["Am", "F", "C", "G"],
+      "events": [
+        {"beat": 0.0, "note": 57, "velocity": 85, "duration": 4.0}
+      ]
+    },
+    "melody": {
+      "pattern_name": "melody track name",
+      "type": "melodic",
+      "events": [
+        {"beat": 0.0, "note": 72, "velocity": 95, "duration": 0.5}
+      ]
+    }
+  }
+}
+
+IMPORTANT:
+- All events must fit within loop_length_beats
+- Events within each track MUST be sorted by beat position
+- Drums: use simultaneous hits (kick+hat, snare+crash)
+- Bass: keep monophonic — one note at a time, rhythmically interesting
+- Chords: multiple simultaneous notes form chords, use smooth voice leading
+- Melody: singable line with musical phrasing (not just scale runs)
+- Generate enough events per track to fill the entire loop
+- For 4-bar patterns (16 beats): drums ~30-60 events, bass ~12-24, chords ~12-20, melody ~16-32"""
+
+ARRANGEMENT_MODIFY_SYSTEM_PROMPT = """You are a professional music producer and MIDI programmer. You will receive an existing multi-track arrangement as JSON, along with modification instructions from the user.
+
+Your task is to modify the arrangement while PRESERVING the musical cohesion between tracks.
+
+RULES:
+1. Return ONLY valid JSON, no markdown, no explanation, no code fences.
+2. Keep the same JSON structure with "tracks" containing drums, bass, chords, melody.
+3. If the user changes one track, ensure other tracks still complement it.
+4. If transposing, transpose bass, chords, and melody together (not drums).
+5. If changing style, adjust ALL tracks to match the new feel.
+6. Keep all shared parameters (key, tempo, time sig, loop length) consistent.
+7. Events MUST be sorted by beat position within each track.
+
+OUTPUT FORMAT: Same as the original arrangement JSON structure."""
+
+
+def _validate_arrangement(data: dict) -> dict:
+    """Validate and sanitize a multi-track arrangement from LLM."""
+    if "tracks" not in data:
+        raise ValueError("Missing 'tracks' in arrangement")
+
+    tracks = data["tracks"]
+    if not isinstance(tracks, dict):
+        raise ValueError("'tracks' must be a dict")
+
+    loop_len = float(data.get("loop_length_beats", 16))
+    if loop_len <= 0:
+        raise ValueError("loop_length_beats must be positive")
+
+    # Shared metadata
+    key_root = int(data.get("key_root", 60))
+    bpm = float(data.get("bpm_suggestion", 120))
+    time_num = int(data.get("time_signature_num", 4))
+    time_den = int(data.get("time_signature_den", 4))
+    scale_name = data.get("scale_name", "minor")
+
+    validated_tracks = {}
+    for track_name in ["drums", "bass", "chords", "melody"]:
+        if track_name not in tracks:
+            continue  # optional tracks
+        track = tracks[track_name]
+        events = track.get("events", [])
+        if not isinstance(events, list):
+            continue
+
+        clean_events = []
+        for evt in events:
+            beat = float(evt.get("beat", 0))
+            note = int(evt.get("note", 60))
+            vel = int(evt.get("velocity", 100))
+            dur = float(evt.get("duration", 0.25))
+
+            note = max(0, min(127, note))
+            vel = max(1, min(127, vel))
+            dur = max(0.01, min(loop_len, dur))
+            beat = max(0, min(loop_len - 0.01, beat))
+
+            clean_events.append({
+                "beat": round(beat, 4),
+                "note": note,
+                "velocity": vel,
+                "duration": round(dur, 4)
+            })
+
+        if track_name == "drums":
+            clean_events.sort(key=lambda e: (e["beat"], e["note"]))
+        else:
+            clean_events.sort(key=lambda e: (e["beat"], e["note"]))
+
+        # Build individual pattern dict
+        pattern = {
+            "pattern_name": track.get("pattern_name", f"AI {track_name.title()}"),
+            "type": track.get("type", "drums" if track_name == "drums" else "melodic"),
+            "key_root": key_root,
+            "scale_name": scale_name if track_name != "drums" else "percussion",
+            "time_signature_num": time_num,
+            "time_signature_den": time_den,
+            "loop_length_beats": loop_len,
+            "bpm_suggestion": bpm,
+            "events": clean_events,
+        }
+        if track_name == "drums":
+            pattern["kit_name"] = track.get("kit_name", "Standard Kit")
+        if track_name == "chords":
+            pattern["chord_symbols"] = track.get("chord_symbols", [])
+            pattern["type"] = "chords"
+
+        validated_tracks[track_name] = pattern
+
+    if not validated_tracks:
+        raise ValueError("No valid tracks in arrangement")
+
+    data["tracks"] = validated_tracks
+    data["loop_length_beats"] = loop_len
+    data["key_root"] = key_root
+    data["bpm_suggestion"] = bpm
+    data["scale_name"] = scale_name
+    data.setdefault("arrangement_name", "AI Arrangement")
+    data.setdefault("time_signature_num", time_num)
+    data.setdefault("time_signature_den", time_den)
+    data["type"] = "arrangement"
+
+    return data
+
+
 def _get_prompts(mode: str = "melodic"):
     """Return the appropriate system prompts for the given mode."""
     if mode == "drums":
         return DRUM_SYSTEM_PROMPT, DRUM_MODIFY_SYSTEM_PROMPT
     if mode == "chords":
         return CHORD_SYSTEM_PROMPT, CHORD_MODIFY_SYSTEM_PROMPT
+    if mode == "arrangement":
+        return ARRANGEMENT_SYSTEM_PROMPT, ARRANGEMENT_MODIFY_SYSTEM_PROMPT
     return SYSTEM_PROMPT, MODIFY_SYSTEM_PROMPT
 
 
@@ -548,6 +726,8 @@ def _get_validator(mode: str = "melodic"):
         return _validate_drum_pattern
     if mode == "chords":
         return _validate_chord_pattern
+    if mode == "arrangement":
+        return _validate_arrangement
     return _validate_pattern
 
 

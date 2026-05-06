@@ -1,9 +1,10 @@
 /**
- * FalconEYE AI Music Generator — Frontend Application
- * Supports three generation modes: Melodic Arpeggio, Drum Loop, Chord Progression
- * Full-featured: prompt UI, piano roll, MIDI preview, pattern library,
- * tab navigation, settings management, pattern modification.
- * (c) 2026 FalconEYE Software Dev
+ * C@sp3r: the MIDI Phantom Composer Ghost Writer — Frontend Application
+ * Handles generation, preview, library, and settings UI.
+ *
+ * Uses vanilla JS with canvas rendering for piano roll visualization.
+ *
+ * (c) 2026 s0wingseason / Calvin D. Roberts
  */
 
 // ============================================================
@@ -135,10 +136,11 @@ let versionIndex = -1;
 const PLACEHOLDERS = {
     melodic: 'e.g. Dark ambient C minor arpeggio, ascending then descending with ghost notes, triplet feel, 2 bars...',
     drums: 'e.g. Tight trap beat with rapid hi-hat rolls, punchy 808 kick, snare on 2 and 4, 2 bars...',
-    chords: 'e.g. Dreamy neo-soul chord progression in Eb major, jazzy extensions with 7ths and 9ths, 4 bars...'
+    chords: 'e.g. Dreamy neo-soul chord progression in Eb major, jazzy extensions with 7ths and 9ths, 4 bars...',
+    arrangement: 'e.g. Dark trap beat with 808 bass, eerie minor melody, atmospheric pad chords, and hard-hitting drums, 4 bars...'
 };
-const TYPE_LABELS = { melodic: 'arpeggio', drums: 'drum loop', chords: 'chord progression' };
-const BTN_LABELS = { melodic: 'Generate Pattern', drums: 'Generate Drum Loop', chords: 'Generate Chords' };
+const TYPE_LABELS = { melodic: 'arpeggio', drums: 'drum loop', chords: 'chord progression', arrangement: 'arrangement' };
+const BTN_LABELS = { melodic: 'Generate Pattern', drums: 'Generate Drum Loop', chords: 'Generate Chords', arrangement: 'Generate Arrangement' };
 
 // ============================================================
 // API Helpers
@@ -164,11 +166,14 @@ function setMode(mode) {
     const isMelodic = mode === 'melodic';
     const isDrums = mode === 'drums';
     const isChords = mode === 'chords';
+    const isArr = mode === 'arrangement';
 
-    if (DOM.melodicParams) DOM.melodicParams.style.display = (isMelodic || isChords) ? 'grid' : 'none';
+    if (DOM.melodicParams) DOM.melodicParams.style.display = (isMelodic || isChords || isArr) ? 'grid' : 'none';
     if (DOM.melodicStyles) DOM.melodicStyles.style.display = isMelodic ? '' : 'none';
     if (DOM.drumStyles) DOM.drumStyles.style.display = isDrums ? '' : 'none';
     if (DOM.chordStyles) DOM.chordStyles.style.display = isChords ? '' : 'none';
+    const arrStyles = document.getElementById('arrangementStyles');
+    if (arrStyles) arrStyles.style.display = isArr ? '' : 'none';
 
     // Update labels
     if (DOM.promptTypeLabel) DOM.promptTypeLabel.textContent = TYPE_LABELS[mode] || 'pattern';
@@ -394,6 +399,24 @@ async function generatePattern() {
     const combinedStyles = getActiveStylesText();
     if (combinedStyles) params.style = combinedStyles;
 
+    // Complexity (1-10)
+    const complexityEl = document.getElementById('paramComplexity');
+    if (complexityEl && complexityEl.value !== '5') params.complexity = complexityEl.value;
+
+    // Humanization (0-100)
+    const humanizeEl = document.getElementById('paramHumanize');
+    if (humanizeEl && humanizeEl.value !== '50') params.humanization = humanizeEl.value;
+
+    // Style blend (when 2 styles selected)
+    const blendSlider = document.getElementById('blendSlider');
+    const activeChips = document.querySelectorAll('.chip.active');
+    if (activeChips.length === 2 && blendSlider) {
+        const pct = parseInt(blendSlider.value);
+        const a = activeChips[0].textContent.trim();
+        const b = activeChips[1].textContent.trim();
+        params.style = `Blend of ${100-pct}% ${a} and ${pct}% ${b}`;
+    }
+
     // Multi-provider: collect checked providers
     const providers = [];
     if (DOM.provGemini?.checked) providers.push('gemini');
@@ -496,12 +519,12 @@ function displayPattern(pattern) {
     currentPattern = pattern;
     const isDrums = pattern.type === 'drums';
     const isChords = pattern.type === 'chords';
+    const isArr = pattern.type === 'arrangement';
 
     // Auto-set mode to match displayed pattern
     if (pattern.type && pattern.type !== generationMode) setMode(pattern.type);
 
     DOM.pianoRollPlaceholder.classList.add('hidden');
-    renderer.render(pattern);
     DOM.patternInfo.style.display = 'grid';
     DOM.previewControls.style.display = 'flex';
     DOM.modifyPanel.style.display = 'block';
@@ -520,7 +543,23 @@ function displayPattern(pattern) {
     if (DOM.infoKit) DOM.infoKit.textContent = pattern.kit_name || 'Standard Kit';
     if (DOM.infoTypeCard) {
         DOM.infoTypeCard.style.display = '';
-        DOM.infoType.textContent = isDrums ? '🥁 Drums' : isChords ? '🎶 Chords' : '🎹 Melodic';
+        DOM.infoType.textContent = isArr ? '🎼 Arrangement' : isDrums ? '🥁 Drums' : isChords ? '🎶 Chords' : '🎹 Melodic';
+    }
+
+    // Arrangement-specific display
+    const arrTracksEl = document.getElementById('arrangementTracks');
+    const infoTracksCard = document.getElementById('infoTracksCard');
+    const infoTracks = document.getElementById('infoTracks');
+    if (isArr && pattern.tracks) {
+        if (arrTracksEl) arrTracksEl.style.display = '';
+        if (infoTracksCard) { infoTracksCard.style.display = ''; infoTracks.textContent = `${pattern.track_count || Object.keys(pattern.tracks).length}`; }
+        DOM.pianoRollPlaceholder.classList.remove('hidden');
+        // Render mini piano rolls for each track
+        renderArrangementTracks(pattern.tracks, pattern.loop_length_beats);
+    } else {
+        if (arrTracksEl) arrTracksEl.style.display = 'none';
+        if (infoTracksCard) infoTracksCard.style.display = 'none';
+        renderer.render(pattern);
     }
 
     // Hide instrument select for drums
@@ -757,6 +796,148 @@ document.getElementById('btnStopServer')?.addEventListener('click', async () => 
 // Ctrl+Enter
 DOM.promptInput.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generatePattern(); } });
 DOM.btnGenerate.addEventListener('click', generatePattern);
+
+// ============================================================
+// Complexity & Humanization Sliders
+// ============================================================
+(function() {
+    const complexity = document.getElementById('paramComplexity');
+    const complexityVal = document.getElementById('complexityValue');
+    const humanize = document.getElementById('paramHumanize');
+    const humanizeVal = document.getElementById('humanizeValue');
+
+    if (complexity && complexityVal) {
+        complexity.addEventListener('input', () => { complexityVal.textContent = complexity.value; });
+    }
+    if (humanize && humanizeVal) {
+        humanize.addEventListener('input', () => { humanizeVal.textContent = humanize.value + '%'; });
+    }
+})();
+
+// ============================================================
+// Style Blend Slider (shows when exactly 2 styles selected)
+// ============================================================
+(function() {
+    const container = document.getElementById('blendContainer');
+    const slider = document.getElementById('blendSlider');
+    const valuesEl = document.getElementById('blendValues');
+    const labelA = document.getElementById('blendLabelA');
+    const labelB = document.getElementById('blendLabelB');
+    if (!container || !slider) return;
+
+    function updateBlendUI() {
+        const active = document.querySelectorAll('.chip.active');
+        if (active.length === 2) {
+            container.style.display = '';
+            const a = active[0].textContent.trim();
+            const b = active[1].textContent.trim();
+            if (labelA) labelA.textContent = a;
+            if (labelB) labelB.textContent = b;
+            const pct = parseInt(slider.value);
+            if (valuesEl) valuesEl.textContent = `${100-pct}% / ${pct}%`;
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    slider.addEventListener('input', () => {
+        const active = document.querySelectorAll('.chip.active');
+        if (active.length === 2) {
+            const pct = parseInt(slider.value);
+            if (valuesEl) valuesEl.textContent = `${100-pct}% / ${pct}%`;
+        }
+    });
+
+    // Hook into chip click events to update blend visibility
+    const orig = window._updateBlendUI;
+    window._updateBlendUI = updateBlendUI;
+    // Observe chip toggles
+    document.addEventListener('click', e => {
+        if (e.target.closest('.chip') || e.target.closest('.style-tag-x')) {
+            setTimeout(updateBlendUI, 50);
+        }
+    });
+})();
+
+// ============================================================
+// Arrangement Multi-Track Mini Piano Rolls
+// ============================================================
+function renderArrangementTracks(tracks, loopLen) {
+    const trackConfig = {
+        drums:  { canvasId: 'arrDrumsCanvas',  eventsId: 'arrDrumsEvents',  hue: 30 },
+        bass:   { canvasId: 'arrBassCanvas',   eventsId: 'arrBassEvents',   hue: 0 },
+        chords: { canvasId: 'arrChordsCanvas',  eventsId: 'arrChordsEvents',  hue: 185 },
+        melody: { canvasId: 'arrMelodyCanvas',  eventsId: 'arrMelodyEvents',  hue: 275 },
+    };
+
+    for (const [name, cfg] of Object.entries(trackConfig)) {
+        const canvas = document.getElementById(cfg.canvasId);
+        const eventsEl = document.getElementById(cfg.eventsId);
+        if (!canvas) continue;
+
+        const track = tracks[name];
+        if (!track || !track.events || !track.events.length) {
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr; canvas.height = 60 * dpr;
+            canvas.style.width = rect.width + 'px'; canvas.style.height = '60px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, 60);
+            ctx.fillStyle = 'rgba(10,10,20,0.6)';
+            ctx.fillRect(0, 0, rect.width, 60);
+            ctx.fillStyle = 'rgba(80,80,130,0.3)';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('No data', rect.width/2, 34);
+            if (eventsEl) eventsEl.textContent = '';
+            continue;
+        }
+
+        const events = track.events;
+        if (eventsEl) eventsEl.textContent = `${events.length} events`;
+
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const w = rect.width;
+        const h = 60;
+        canvas.width = w * dpr; canvas.height = h * dpr;
+        canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Background
+        ctx.fillStyle = 'rgba(10,10,20,0.6)';
+        ctx.fillRect(0, 0, w, h);
+
+        // Beat grid
+        const ll = loopLen || 16;
+        ctx.strokeStyle = 'rgba(80,80,130,0.15)';
+        for (let b = 1; b < ll; b++) {
+            const x = (b / ll) * w;
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+
+        // Note range
+        let minN = 127, maxN = 0;
+        for (const e of events) { if (e.note < minN) minN = e.note; if (e.note > maxN) maxN = e.note; }
+        const range = Math.max(maxN - minN + 1, 1);
+        const noteH = Math.min(Math.max(h / range, 2), 8);
+
+        // Draw notes
+        for (const e of events) {
+            const x = (e.beat / ll) * w;
+            const nw = Math.max((e.duration / ll) * w, 2);
+            const y = h - 3 - ((e.note - minN) / range) * (h - 6);
+            const vR = (e.velocity || 100) / 127;
+            const sat = 60 + vR * 30;
+            const light = 40 + vR * 25;
+            const alpha = 0.5 + vR * 0.4;
+            ctx.fillStyle = `hsla(${cfg.hue},${sat}%,${light}%,${alpha})`;
+            ctx.fillRect(x, y - noteH/2, nw, noteH);
+        }
+    }
+}
 
 // ============================================================
 // Init — load config and set provider defaults

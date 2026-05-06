@@ -2,7 +2,7 @@
 MIDI File Exporter — Pure Python Standard MIDI File (SMF) writer.
 Converts pattern data to Type 0 .mid files with no external dependencies.
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import logging
@@ -187,3 +187,111 @@ def export_midi_file(pattern_data: dict, output_path: str) -> str:
     num_events = len(pattern_data.get("events", []))
     logger.info("MIDI exported (%s): %d events → %s", pattern_type, num_events, output_path)
     return output_path
+
+
+def _build_track_chunk(pattern_data: dict, channel: int, ppqn: int = 480,
+                       include_tempo: bool = False) -> bytes:
+    """Build a single MIDI track chunk from pattern data."""
+    events = pattern_data.get("events", [])
+    bpm = float(pattern_data.get("bpm_suggestion", 120))
+    pattern_type = pattern_data.get("type", "melodic")
+    pattern_name = pattern_data.get("pattern_name", "Track")
+    time_num = int(pattern_data.get("time_signature_num", 4))
+    time_den = int(pattern_data.get("time_signature_den", 4))
+    is_drums = pattern_type == "drums"
+    ch = 9 if is_drums else channel
+
+    track_data = bytearray()
+    track_data += _make_track_name_event(pattern_name)
+
+    if include_tempo:
+        track_data += _make_time_sig_event(time_num, time_den)
+        track_data += _make_tempo_event(bpm)
+
+    if not is_drums:
+        # Assign GM program: 0=Piano, 33=Fingered Bass, 48=Strings, 80=Lead
+        programs = {"bass": 33, "chords": 48, "melody": 80}
+        prog = programs.get(pattern_data.get("_track_role", ""), 0)
+        track_data += _make_program_change(ch, prog)
+
+    midi_events = []
+    for evt in events:
+        beat = float(evt.get("beat", 0))
+        note = max(0, min(127, int(evt.get("note", 60))))
+        vel = max(1, min(127, int(evt.get("velocity", 100))))
+        dur = float(evt.get("duration", 0.25))
+        on_tick = int(beat * ppqn)
+        off_tick = int((beat + dur) * ppqn)
+        midi_events.append((on_tick, NOTE_ON | ch, note, vel))
+        midi_events.append((off_tick, NOTE_OFF | ch, note, 0))
+
+    midi_events.sort(key=lambda e: (e[0], 0 if (e[1] & 0xF0) == NOTE_OFF else 1, e[2]))
+
+    prev_tick = 0
+    for tick, status, data1, data2 in midi_events:
+        delta = max(0, tick - prev_tick)
+        track_data += _write_variable_length(delta)
+        track_data += bytes([status, data1 & 0x7F, data2 & 0x7F])
+        prev_tick = tick
+
+    track_data += _make_end_of_track()
+    return b"MTrk" + struct.pack(">I", len(track_data)) + bytes(track_data)
+
+
+def export_arrangement_midi(arrangement_data: dict, output_path: str,
+                            ppqn: int = 480) -> str:
+    """
+    Export a multi-track arrangement as a Type 1 MIDI file.
+    Each arrangement track (drums, bass, chords, melody) becomes a
+    separate MIDI track, ready for drag-and-drop into any DAW.
+
+    Args:
+        arrangement_data: Full arrangement dict with 'tracks'
+        output_path: Path to write the .mid file
+
+    Returns:
+        The output file path
+    """
+    tracks = arrangement_data.get("tracks", {})
+    if not tracks:
+        raise ValueError("No tracks in arrangement")
+
+    # Channel assignments: drums=9, bass=1, chords=2, melody=3
+    channel_map = {"drums": 9, "bass": 1, "chords": 2, "melody": 3}
+    track_order = ["drums", "bass", "chords", "melody"]
+
+    track_chunks = []
+    for i, track_name in enumerate(track_order):
+        if track_name not in tracks:
+            continue
+        tdata = dict(tracks[track_name])
+        tdata["_track_role"] = track_name
+        ch = channel_map.get(track_name, i)
+        include_tempo = (len(track_chunks) == 0)  # first track gets tempo
+        chunk = _build_track_chunk(tdata, ch, ppqn, include_tempo)
+        track_chunks.append(chunk)
+
+    if not track_chunks:
+        raise ValueError("No valid tracks to export")
+
+    # Header: Type 1, N tracks
+    num_tracks = len(track_chunks)
+    header = b"MThd" + struct.pack(">IHhH", 6, 1, num_tracks, ppqn)
+
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+
+    with open(output_path, "wb") as f:
+        f.write(header)
+        for chunk in track_chunks:
+            f.write(chunk)
+
+    total_events = sum(
+        len(tracks[t].get("events", []))
+        for t in track_order if t in tracks
+    )
+    logger.info(
+        "Arrangement MIDI exported: %d tracks, %d events → %s",
+        num_tracks, total_events, output_path
+    )
+    return output_path
+

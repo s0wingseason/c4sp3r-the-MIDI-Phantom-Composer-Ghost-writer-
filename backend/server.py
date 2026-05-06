@@ -1,8 +1,8 @@
 """
-Flask Server — FalconEYE AI Arpeggio Generator backend.
-Serves the web UI and handles LLM API calls, MIDI preview, and pattern library.
+Flask Server — C@sp3r: the MIDI Phantom Composer Ghost Writer backend.
+Handles AI generation, pattern management, MIDI preview, and REAPER communication.
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import json
@@ -31,7 +31,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 from llm_engine import create_provider, create_provider_by_name, get_available_providers
-from midi_export import export_midi_file
+from midi_export import export_midi_file, export_arrangement_midi
 from midi_preview import get_player
 from pattern_library import PatternLibrary
 from pattern_writer import (
@@ -45,8 +45,8 @@ from pattern_writer import (
 # ---------------------------------------------------------------------------
 # Setup
 # ---------------------------------------------------------------------------
-# Logging — write to %APPDATA%/FalconEYE/logs/ with timestamped session files
-_log_dir = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "FalconEYE", "logs")
+# Logging — write to %APPDATA%/Casper/logs/ with timestamped session files
+_log_dir = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "Casper", "logs")
 os.makedirs(_log_dir, exist_ok=True)
 _session_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 _log_file = os.path.join(_log_dir, f"session_{_session_stamp}.log")
@@ -221,14 +221,14 @@ def generate_pattern():
     if not prompt:
         return jsonify({"error": "Prompt is required"}), 400
 
-    # Generation mode: "melodic" (default), "drums", or "chords"
+    # Generation mode: "melodic" (default), "drums", "chords", or "arrangement"
     mode = data.get("mode", "melodic")
-    if mode not in ("melodic", "drums", "chords"):
+    if mode not in ("melodic", "drums", "chords", "arrangement"):
         mode = "melodic"
 
     # Build enhanced prompt
     params = []
-    if mode == "melodic" or mode == "chords":
+    if mode in ("melodic", "chords", "arrangement"):
         for key, label in [("key", "Key"), ("scale", "Scale"),
                            ("time_sig", "Time signature"), ("bars", "Number of bars"),
                            ("subdivision", "Note subdivision"),
@@ -242,6 +242,26 @@ def generate_pattern():
                            ("style", "Style/feel")]:
             if data.get(key):
                 params.append(f"{label}: {data[key]}")
+
+    # Complexity slider (1-10) — inject into prompt
+    complexity = data.get("complexity")
+    if complexity:
+        params.append(f"Complexity/density level: {complexity}/10")
+
+    # Humanization slider (0-100%) — inject into prompt
+    humanization = data.get("humanization")
+    if humanization:
+        human_int = int(humanization)
+        if human_int <= 20:
+            params.append("Timing: perfectly quantized, machine-like precision")
+        elif human_int <= 40:
+            params.append("Timing: mostly quantized with very slight velocity variation")
+        elif human_int <= 60:
+            params.append("Timing: natural feel with subtle velocity dynamics and occasional swing")
+        elif human_int <= 80:
+            params.append("Timing: human feel with expressive velocity variation, ghost notes, and micro-timing")
+        else:
+            params.append("Timing: very loose human feel, heavy swing, rubato, dramatic velocity swings, ghost notes")
 
     full_prompt = prompt
     if params:
@@ -328,29 +348,74 @@ def _generate_worker(full_prompt: str, original_prompt: str,
                 provider = create_provider_by_name(provider_name, config)
                 pattern_data = provider.generate(full_prompt, mode=mode)
 
-                # Write the latest result as the active REAPER pattern
-                write_pattern_file(pattern_data, output_path)
+                if mode == "arrangement":
+                    # Arrangement: save each track separately + multi-track MIDI
+                    tracks = pattern_data.get("tracks", {})
+                    arr_name = pattern_data.get("arrangement_name", "AI Arrangement")
+                    track_entries = []
+                    for tname, tdata in tracks.items():
+                        tpath = os.path.join(data_path, f"AI_Arrangement_{tname}.txt")
+                        write_pattern_file(tdata, tpath)
+                        if auto_save:
+                            entry = library.save_pattern(
+                                tdata, f"[{arr_name}] {tname}", category
+                            )
+                            track_entries.append(entry)
 
-                # Auto-export MIDI
-                midi_path = os.path.splitext(output_path)[0] + ".mid"
-                try:
-                    export_midi_file(pattern_data, midi_path)
-                except Exception as me:
-                    logger.warning("MIDI export failed (non-fatal): %s", me)
+                    # Export multi-track MIDI
+                    arr_midi = os.path.join(data_path, "AI_Arrangement.mid")
+                    try:
+                        export_arrangement_midi(pattern_data, arr_midi)
+                    except Exception as me:
+                        logger.warning("Arrangement MIDI export failed: %s", me)
 
-                # Auto-save to library
-                saved_entry = None
-                if auto_save:
-                    saved_entry = library.save_pattern(
-                        pattern_data, original_prompt, category
-                    )
+                    # Also write the melody as the main REAPER pattern
+                    if "melody" in tracks:
+                        write_pattern_file(tracks["melody"], output_path)
+                    elif tracks:
+                        first_track = list(tracks.values())[0]
+                        write_pattern_file(first_track, output_path)
 
-                display = pattern_to_display(pattern_data)
+                    # Build display for arrangement
+                    display = {
+                        "pattern_name": arr_name,
+                        "type": "arrangement",
+                        "key_root": pattern_data.get("key_root", 60),
+                        "scale_name": pattern_data.get("scale_name", "minor"),
+                        "time_sig": f"{pattern_data.get('time_signature_num', 4)}/{pattern_data.get('time_signature_den', 4)}",
+                        "loop_length_beats": pattern_data.get("loop_length_beats", 16),
+                        "bpm_suggestion": pattern_data.get("bpm_suggestion", 120),
+                        "num_events": sum(len(t.get("events", [])) for t in tracks.values()),
+                        "track_count": len(tracks),
+                        "track_names": list(tracks.keys()),
+                        "tracks": {k: pattern_to_display(v) for k, v in tracks.items()},
+                        "events": [],  # placeholder — piano roll uses tracks
+                    }
+                    if track_entries:
+                        display["library_ids"] = [e["id"] for e in track_entries]
+                else:
+                    # Single-track mode (melodic, drums, chords)
+                    write_pattern_file(pattern_data, output_path)
+
+                    midi_path = os.path.splitext(output_path)[0] + ".mid"
+                    try:
+                        export_midi_file(pattern_data, midi_path)
+                    except Exception as me:
+                        logger.warning("MIDI export failed (non-fatal): %s", me)
+
+                    saved_entry = None
+                    if auto_save:
+                        saved_entry = library.save_pattern(
+                            pattern_data, original_prompt, category
+                        )
+
+                    display = pattern_to_display(pattern_data)
+                    if saved_entry:
+                        display["library_id"] = saved_entry["id"]
+
                 display["provider"] = provider_name
                 if iterations > 1:
                     display["iteration"] = iteration
-                if saved_entry:
-                    display["library_id"] = saved_entry["id"]
 
                 results.append(display)
                 logger.info(
@@ -358,6 +423,10 @@ def _generate_worker(full_prompt: str, original_prompt: str,
                     mode, provider_name, iteration,
                     display.get("pattern_name", "?")
                 )
+
+                # Write generation report
+                _write_report(display, original_prompt, full_prompt, mode,
+                              provider_name, iteration, data_path)
 
             except Exception as e:
                 err_msg = f"{provider_name.capitalize()} v{iteration}: {str(e)}"
@@ -383,11 +452,18 @@ def _generate_worker(full_prompt: str, original_prompt: str,
             count_str = f"{len(results)} result(s)"
             if errors:
                 count_str += f" ({len(errors)} failed)"
-            generation_status["message"] = (
-                f"Done! {count_str} — "
-                f"{results[0]['num_events']} events, "
-                f"{results[0]['loop_length_beats']} beats"
-            )
+            if mode == "arrangement":
+                tc = results[0].get('track_count', 0)
+                generation_status["message"] = (
+                    f"Done! {count_str} — {tc} tracks, "
+                    f"{results[0].get('num_events', 0)} total events"
+                )
+            else:
+                generation_status["message"] = (
+                    f"Done! {count_str} — "
+                    f"{results[0]['num_events']} events, "
+                    f"{results[0]['loop_length_beats']} beats"
+                )
         else:
             generation_status["status"] = "error"
             generation_status["message"] = "All generations failed: " + "; ".join(errors)
@@ -395,6 +471,46 @@ def _generate_worker(full_prompt: str, original_prompt: str,
             generation_status["results"] = []
 
         generation_status["timestamp"] = datetime.now().isoformat()
+
+
+def _write_report(display: dict, original_prompt: str, full_prompt: str,
+                  mode: str, provider: str, iteration: int, data_path: str):
+    """Write a generation report text file alongside the pattern."""
+    try:
+        stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        lines = [
+            "=" * 60,
+            f"  C@sp3r — MIDI Phantom Composer — Generation Report",
+            "=" * 60,
+            f"  Date:       {stamp}",
+            f"  Mode:       {mode}",
+            f"  Provider:   {provider.capitalize()} (iteration {iteration})",
+            f"  Pattern:    {display.get('pattern_name', '?')}",
+            f"  Events:     {display.get('num_events', '?')}",
+            f"  Length:     {display.get('loop_length_beats', '?')} beats",
+            f"  BPM:        {display.get('bpm_suggestion', '?')}",
+            f"  Time Sig:   {display.get('time_sig', '4/4')}",
+            f"  Key/Scale:  {display.get('scale_name', '?')}",
+            "=" * 60,
+            "",
+            "ORIGINAL PROMPT:",
+            original_prompt,
+            "",
+            "FULL PROMPT (with parameters):",
+            full_prompt,
+            "",
+            "=" * 60,
+        ]
+        if mode == "arrangement":
+            lines.insert(-1, f"  Tracks:     {display.get('track_count', '?')}")
+            lines.insert(-1, f"  Track list: {', '.join(display.get('track_names', []))}")
+
+        report_path = os.path.join(data_path, "AI_generation_report.txt")
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+        logger.info("Report written: %s", report_path)
+    except Exception as e:
+        logger.warning("Report write failed (non-fatal): %s", e)
 
 
 # ---- Results Navigation ----
@@ -742,7 +858,7 @@ def main():
     port = config.get("server_port", 8765)
 
     print("=" * 60)
-    print("  FalconEYE AI Arpeggio Generator — Backend Server")
+    print("  C@sp3r — MIDI Phantom Composer Ghost Writer — Backend Server")
     print("=" * 60)
     print(f"  Web UI:    http://localhost:{port}")
     print(f"  Provider:  {config.get('llm_provider', 'gemini').upper()}")

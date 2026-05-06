@@ -1,7 +1,7 @@
 /* ============================================================
-   FalconEYE AI Arpeggio Generator — Stylesheet
+   C@sp3r: the MIDI Phantom Composer Ghost Writer — Stylesheet
    Premium dark theme with glassmorphism, Inter font, vibrant accents
-   (c) 2026 FalconEYE Software Dev
+   (c) 2026 s0wingseason / Calvin D. Roberts
    ============================================================ */
 
 /* ---------- CSS Custom Properties ---------- */
@@ -1836,4 +1836,248 @@ input[type="number"]:focus {
 /* When console is open, push body up slightly */
 body.console-open .app-container {
     padding-bottom: 320px;
+}
+
+/* ---------- Complexity & Humanization Sliders ---------- */
+.slider-params {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.slider-group {
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+}
+
+.slider-group label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.slider-value {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-purple);
+    min-width: 30px;
+    text-align: right;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Custom range slider */
+.styled-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    margin: 6px 0 2px;
+}
+
+.complexity-slider {
+    background: linear-gradient(90deg, rgba(99,102,241,0.3) 0%, rgba(168,85,247,0.6) 100%);
+}
+
+.humanize-slider {
+    background: linear-gradient(90deg, rgba(59,130,246,0.3) 0%, rgba(245,158,11,0.6) 100%);
+}
+
+.styled-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-purple);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.styled-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.7);
+}
+
+.humanize-slider::-webkit-slider-thumb {
+    background: var(--accent-amber);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.humanize-slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);
+}
+
+/* ---------- Style Blend Slider ---------- */
+.blend-container {
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    animation: slideIn 0.3s ease-out;
+}
+
+.blend-container label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.blend-values {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent-cyan);
+    font-weight: 600;
+}
+
+.blend-slider {
+    background: linear-gradient(90deg, rgba(168,85,247,0.5) 0%, rgba(34,211,238,0.5) 100%);
+}
+
+.blend-slider::-webkit-slider-thumb {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+}
+
+/* ---------- Arrangement Multi-Track Preview ---------- */
+.arrangement-tracks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: slideIn 0.4s ease-out;
+}
+
+.arrangement-track {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+}
+
+.arrangement-track:hover {
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.arrangement-track[data-track="drums"] { border-left: 3px solid #f59e0b; }
+.arrangement-track[data-track="bass"]  { border-left: 3px solid #ef4444; }
+.arrangement-track[data-track="chords"] { border-left: 3px solid #22d3ee; }
+.arrangement-track[data-track="melody"] { border-left: 3px solid #a855f7; }
+
+.arr-track-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.arr-track-icon {
+    font-size: 0.85rem;
+}
+
+.arr-track-name {
+    flex: 1;
+}
+
+.arr-track-events {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
+.arr-track-canvas {
+    display: block;
+    width: 100%;
+    height: 60px;
+}
+
+/* ---------- Arrangement Chip Accent ---------- */
+.chip.arrangement-chip:hover {
+    background: rgba(34, 211, 238, 0.15);
+    border-color: rgba(34, 211, 238, 0.4);
+    color: var(--accent-cyan);
+}
+
+.chip.arrangement-chip.active {
+    background: rgba(34, 211, 238, 0.2);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+/* ---------- Selected Styles Summary ---------- */
+.selected-styles-summary {
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+}
+
+.styles-label {
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+}
+
+.style-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 50px;
+    color: var(--accent-purple);
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.style-tag-x {
+    background: none;
+    border: none;
+    color: var(--accent-red);
+    font-size: 0.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+}
+
+.style-tag-x:hover {
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+    .slider-params {
+        grid-template-columns: 1fr;
+    }
 }
