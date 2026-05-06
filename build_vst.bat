@@ -108,6 +108,7 @@ echo   The plugin reads AI_Arpeggio_pattern_data.txt from:
 echo     %%APPDATA%%\REAPER\Data\
 echo.
 echo   Controls: Velocity Scale, Octave, Gate, Transpose, Swing
+echo   GUI: Custom dark-themed editor (click plugin window in DAW)
 echo  ============================================================
 echo.
 pause
