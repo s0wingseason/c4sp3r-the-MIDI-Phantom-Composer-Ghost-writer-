@@ -550,20 +550,31 @@ function displayPattern(pattern) {
     const arrTracksEl = document.getElementById('arrangementTracks');
     const infoTracksCard = document.getElementById('infoTracksCard');
     const infoTracks = document.getElementById('infoTracks');
+    const arrTrackToggles = document.getElementById('arrTrackToggles');
     if (isArr && pattern.tracks) {
         if (arrTracksEl) arrTracksEl.style.display = '';
         if (infoTracksCard) { infoTracksCard.style.display = ''; infoTracks.textContent = `${pattern.track_count || Object.keys(pattern.tracks).length}`; }
         DOM.pianoRollPlaceholder.classList.remove('hidden');
-        // Render mini piano rolls for each track
         renderArrangementTracks(pattern.tracks, pattern.loop_length_beats);
+        // Show track solo toggles and activate only tracks that exist
+        if (arrTrackToggles) {
+            arrTrackToggles.style.display = 'flex';
+            arrTrackToggles.querySelectorAll('.track-toggle').forEach(btn => {
+                const trackName = btn.dataset.track;
+                const exists = !!(pattern.tracks[trackName] && pattern.tracks[trackName].events && pattern.tracks[trackName].events.length);
+                btn.style.display = exists ? '' : 'none';
+                btn.classList.toggle('active', exists);
+            });
+        }
     } else {
         if (arrTracksEl) arrTracksEl.style.display = 'none';
         if (infoTracksCard) infoTracksCard.style.display = 'none';
+        if (arrTrackToggles) arrTrackToggles.style.display = 'none';
         renderer.render(pattern);
     }
 
-    // Hide instrument select for drums
-    if (DOM.previewInstrument) DOM.previewInstrument.style.display = isDrums ? 'none' : '';
+    // Hide instrument select for drums or arrangements (arrangements use their own channels)
+    if (DOM.previewInstrument) DOM.previewInstrument.style.display = (isDrums || isArr) ? 'none' : '';
 
     DOM.modBPM.placeholder = pattern.bpm_suggestion || 120;
     DOM.modBPM.value = '';
@@ -659,10 +670,34 @@ DOM.btnPreviewPlay.addEventListener('click', async () => {
     const bpm = parseFloat(currentPattern?.bpm_suggestion || 120);
     const program = parseInt(DOM.previewInstrument.value || 0);
     const loop = DOM.previewLoop.checked;
-    try { const r = await apiPost('/api/preview/play', { pattern, bpm, program, loop }); if (r.ok) { isPreviewPlaying = true; DOM.btnPreviewPlay.classList.add('playing'); } } catch (_) { }
+    const payload = { pattern, bpm, program, loop };
+    // For arrangements, collect which tracks are toggled on
+    if (pattern.type === 'arrangement' && pattern.tracks) {
+        const toggles = document.querySelectorAll('#arrTrackToggles .track-toggle.active');
+        const soloTracks = Array.from(toggles).map(b => b.dataset.track);
+        if (soloTracks.length > 0 && soloTracks.length < Object.keys(pattern.tracks).length) {
+            payload.solo_tracks = soloTracks;
+        }
+    }
+    try { const r = await apiPost('/api/preview/play', payload); if (r.ok) { isPreviewPlaying = true; DOM.btnPreviewPlay.classList.add('playing'); } } catch (_) { }
 });
 DOM.btnPreviewStop.addEventListener('click', async () => {
     try { await apiPost('/api/preview/stop', {}); isPreviewPlaying = false; DOM.btnPreviewPlay.classList.remove('playing'); } catch (_) { }
+});
+
+// Track toggle buttons for arrangement preview
+document.querySelectorAll('#arrTrackToggles .track-toggle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        btn.classList.toggle('active');
+    });
+});
+document.getElementById('toggleAllTracks')?.addEventListener('click', () => {
+    const toggles = document.querySelectorAll('#arrTrackToggles .track-toggle');
+    const allActive = Array.from(toggles).filter(b => b.style.display !== 'none').every(b => b.classList.contains('active'));
+    toggles.forEach(b => {
+        if (b.style.display !== 'none') b.classList.toggle('active', !allActive);
+    });
 });
 
 // ============================================================

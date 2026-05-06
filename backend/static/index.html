@@ -504,6 +504,15 @@
                                 <option value="0">Piano</option>
                             </select>
                         </div>
+                        <!-- Arrangement Track Solo Toggles (visible only for arrangements) -->
+                        <div class="arr-track-toggles" id="arrTrackToggles" style="display:none">
+                            <span class="track-toggle-label">Tracks:</span>
+                            <button class="track-toggle active" data-track="drums" id="toggleDrums" title="Toggle Drums">🥁 Drums</button>
+                            <button class="track-toggle active" data-track="bass" id="toggleBass" title="Toggle Bass">🎸 Bass</button>
+                            <button class="track-toggle active" data-track="chords" id="toggleChords" title="Toggle Chords">🎹 Chords</button>
+                            <button class="track-toggle active" data-track="melody" id="toggleMelody" title="Toggle Melody">🎵 Melody</button>
+                            <button class="track-toggle-all" id="toggleAllTracks" title="Select/Deselect all">All</button>
+                        </div>
                     </div>
                     <!-- Result Carousel Navigation -->
                     <div class="result-carousel" id="resultCarousel" style="display:none">
