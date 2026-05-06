@@ -306,7 +306,7 @@ impl Plugin for CasperMidi {
         context: &mut impl ProcessContext<Self>,
     ) -> ProcessStatus {
         // Periodic file poll
-        self.poll_counter += context.transport().tempo.unwrap_or(120.0) as u64;
+        self.poll_counter += _buffer.samples() as u64;
         if self.poll_counter >= self.poll_interval {
             self.poll_counter = 0;
             self.load_pattern();
@@ -386,7 +386,7 @@ impl Plugin for CasperMidi {
             let mut beat = ev.beat;
             let eighth = (beat * 2.0).floor();
             if eighth as i64 % 2 == 1 {
-                beat += swing * 0.5;
+                beat += swing as f64 * 0.5;
             }
 
             // Check if this event falls in the current block
