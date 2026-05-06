@@ -1,0 +1,7 @@
+[workspace]
+members = ["casper_vst", "xtask"]
+
+[profile.release]
+lto = "thin"
+opt-level = 3
+strip = true

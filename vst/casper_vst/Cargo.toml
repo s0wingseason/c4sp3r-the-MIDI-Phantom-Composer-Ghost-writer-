@@ -1,0 +1,13 @@
+[package]
+name = "casper_vst"
+version = "1.0.0"
+authors = ["s0wingseason <Calvin D. Roberts>"]
+edition = "2021"
+description = "C@sp3r: the MIDI Phantom Composer Ghost Writer — VST3 Plugin"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git", features = ["vst3"] }
