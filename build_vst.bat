@@ -61,7 +61,7 @@ echo.
 cd /d "%VST_DIR%"
 
 :: Use cargo xtask to build and bundle
-cargo xtask bundle casper_vst --release
+cargo run --release -p xtask -- bundle casper_vst --release
 if errorlevel 1 (
     echo.
     echo  [ERROR] Build failed. Check the output above for details.

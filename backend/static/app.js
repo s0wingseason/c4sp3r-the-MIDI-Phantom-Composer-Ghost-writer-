@@ -780,6 +780,23 @@ DOM.btnSaveSettings.addEventListener('click', async () => {
     const defIter = document.getElementById('settingDefIterations');
     if (defIter) d.default_iterations = parseInt(defIter.value, 10);
     await apiPost('/api/config', d); DOM.settingsModal.classList.remove('active'); setStatus('idle', 'Settings saved');
+    // Refresh provider availability after saving keys
+    try {
+        const cfg = await apiGet('/api/config');
+        if (DOM.provGemini) { DOM.provGemini.disabled = !cfg.has_gemini_key; }
+        if (DOM.provOpenAI) { DOM.provOpenAI.disabled = !cfg.has_openai_key; }
+        if (DOM.provClaude) { DOM.provClaude.disabled = !cfg.has_claude_key; }
+        // Update default provider checks
+        const updatedDefProvs = cfg.default_providers || [cfg.llm_provider || 'gemini'];
+        if (DOM.provGemini && !DOM.provGemini.disabled) DOM.provGemini.checked = updatedDefProvs.includes('gemini');
+        if (DOM.provOpenAI && !DOM.provOpenAI.disabled) DOM.provOpenAI.checked = updatedDefProvs.includes('openai');
+        if (DOM.provClaude && !DOM.provClaude.disabled) DOM.provClaude.checked = updatedDefProvs.includes('claude');
+        document.querySelectorAll('.provider-toggle').forEach(tog => {
+            const cb = tog.querySelector('input[type="checkbox"]');
+            if (cb && cb.disabled) tog.classList.add('unavailable');
+            else tog.classList.remove('unavailable');
+        });
+    } catch (_) { }
 });
 
 // Open folder buttons
