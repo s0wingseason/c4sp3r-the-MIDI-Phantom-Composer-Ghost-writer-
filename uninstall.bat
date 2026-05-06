@@ -1,9 +1,9 @@
 @echo off
 setlocal EnableDelayedExpansion
-title FalconEYE AI Arpeggio Generator — Uninstall
+title C@sp3r - MIDI Phantom Composer — Uninstall
 echo.
 echo  ============================================================
-echo   FalconEYE AI Arpeggio Generator — Uninstall
+echo   C@sp3r - MIDI Phantom Composer — Uninstall
 echo  ============================================================
 echo.
 
@@ -21,7 +21,7 @@ if exist "%PROJECT_DIR%venv" (
 :: Remove JSFX from REAPER
 echo.
 echo  [2/4] Removing JSFX from REAPER...
-set "JSFX_DEST=%APPDATA%\REAPER\Effects\FalconEYE"
+set "JSFX_DEST=%APPDATA%\REAPER\Effects\Casper"
 if exist "%JSFX_DEST%" (
     rd /s /q "%JSFX_DEST%"
     echo        Removed: %JSFX_DEST%
@@ -32,7 +32,7 @@ if exist "%JSFX_DEST%" (
 :: Remove ReaScript from REAPER
 echo.
 echo  [3/4] Removing ReaScript from REAPER...
-set "SCRIPT_DEST=%APPDATA%\REAPER\Scripts\FalconEYE"
+set "SCRIPT_DEST=%APPDATA%\REAPER\Scripts\Casper"
 if exist "%SCRIPT_DEST%" (
     rd /s /q "%SCRIPT_DEST%"
     echo        Removed: %SCRIPT_DEST%

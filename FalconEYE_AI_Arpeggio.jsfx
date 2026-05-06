@@ -433,7 +433,7 @@ gfx_rect(0, 40, gfx_w, 4);
 gfx_r = 0.95; gfx_g = 0.85; gfx_b = 1.0;
 gfx_setfont(1, "Arial", 18, 'b');
 gfx_x = 12; gfx_y = 12;
-gfx_drawstr("FalconEYE AI Arpeggio Generator");
+gfx_drawstr("C@sp3r - MIDI Phantom Composer");
 
 // Mode indicator
 gfx_setfont(2, "Arial", 13);
@@ -601,4 +601,4 @@ gfx_rect(0, gfx_h - 24, gfx_w, 24);
 gfx_r = 0.4; gfx_g = 0.35; gfx_b = 0.5;
 gfx_setfont(4, "Arial", 10);
 gfx_x = 8; gfx_y = gfx_h - 18;
-gfx_drawstr("FalconEYE AI Arpeggio Gen v1.1  |  Web UI: localhost:8765");
+gfx_drawstr("C@sp3r v1.00  |  Web UI: localhost:8765");

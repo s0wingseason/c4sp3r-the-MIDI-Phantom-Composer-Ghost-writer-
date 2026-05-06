@@ -94,8 +94,8 @@ Double-click `uninstall.bat` to remove the virtual environment and installed dep
 │       ├── style.css           # Dark glassmorphism theme
 │       └── app.js              # Frontend logic
 ├── vst/                        # VST3 plugin source (nih-plug / Rust)
-├── FalconEYE_AI_Arpeggio.jsfx # REAPER JSFX plugin
-├── FalconEYE_AI_Arpeggio_Generator.lua  # REAPER Lua GUI
+├── FalconEYE_AI_Arpeggio.jsfx # REAPER JSFX plugin (legacy filename)
+├── FalconEYE_AI_Arpeggio_Generator.lua  # REAPER Lua GUI (legacy filename)
 ├── config.example.json         # Example configuration
 ├── build_and_run.bat           # One-click install + launch (Windows)
 ├── uninstall.bat               # One-click cleanup

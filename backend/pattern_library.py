@@ -3,7 +3,7 @@ Pattern Library — Persistent storage for generated MIDI patterns.
 Supports save, load, rename, categorize, favorite, and delete operations.
 Patterns are stored as individual JSON files in a library directory.
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import json

@@ -6,7 +6,7 @@ File format (all values are whitespace-separated numbers):
           type: 0 = melodic (default), 1 = drums
   Lines 2+: beat_pos  note  velocity  duration_beats
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import logging

@@ -1,13 +1,13 @@
 --[[
-  FalconEYE AI Arpeggio Generator — REAPER ReaImGui Script
-  Provides an in-REAPER GUI for the AI Arpeggio Generator backend.
+  C@sp3r: the MIDI Phantom Composer Ghost Writer — REAPER ReaImGui Script
+  Provides an in-REAPER GUI for the AI music generator backend.
   Communicates with the Flask server via HTTP on localhost:8765.
   
   Requirements:
     - ReaImGui (cfillion) — install via ReaPack
     - Backend server must be running (build_and_run.bat or the .exe)
     
-  (c) 2026 FalconEYE Software Dev
+  (c) 2026 s0wingseason / Calvin D. Roberts
 ]]
 
 -- ============================================================
@@ -21,7 +21,7 @@ if not reaper.ImGui_CreateContext then
         "  2. Search 'ReaImGui'\n" ..
         "  3. Right-click > Install\n" ..
         "  4. Click Apply, then restart REAPER",
-        "FalconEYE AI Arpeggio — Missing Dependency", 0
+        "C@sp3r — Missing Dependency", 0
     )
     return
 end
@@ -65,7 +65,7 @@ if http_method == "none" then
         "  • Mavriq-Lua-Batteries (install via ReaPack)\n" ..
         "  • curl (built into Windows 10+)\n\n" ..
         "Please install one of these and try again.",
-        "FalconEYE AI Arpeggio — HTTP Error", 0
+        "C@sp3r — HTTP Error", 0
     )
     return
 end
@@ -75,13 +75,13 @@ local script_path = debug.getinfo(1, "S").source:match("@?(.*[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua"
 local json_ok, json = pcall(require, "dkjson")
 if not json_ok then
-    local alt_path = reaper.GetResourcePath() .. "/Scripts/FalconEYE/"
+    local alt_path = reaper.GetResourcePath() .. "/Scripts/Casper/"
     package.path = package.path .. ";" .. alt_path .. "?.lua"
     json_ok, json = pcall(require, "dkjson")
 end
 if not json_ok then
     reaper.MB("Could not load dkjson.lua JSON library.\nMake sure dkjson.lua is in the same folder as this script.",
-        "FalconEYE AI Arpeggio — Error", 0)
+        "C@sp3r — Error", 0)
     return
 end
 
@@ -193,7 +193,7 @@ end
 -- ============================================================
 -- ReaImGui Setup
 -- ============================================================
-local ctx = reaper.ImGui_CreateContext("FalconEYE AI Arpeggio Generator")
+local ctx = reaper.ImGui_CreateContext("C@sp3r - MIDI Phantom Composer")
 local FONT = reaper.ImGui_CreateFont("Inter")
 reaper.ImGui_Attach(ctx, FONT)
 
@@ -991,14 +991,14 @@ local function loop()
     push_theme()
     reaper.ImGui_PushFont(ctx, FONT, SZ)
 
-    local visible, open = reaper.ImGui_Begin(ctx, "FalconEYE AI Arpeggio Generator", true,
+    local visible, open = reaper.ImGui_Begin(ctx, "C@sp3r - MIDI Phantom Composer", true,
         reaper.ImGui_WindowFlags_NoCollapse())
 
     if visible then
         -- Title bar
         reaper.ImGui_PushFont(ctx, FONT, SZ_TITLE)
         reaper.ImGui_PushStyleColor(ctx, reaper.ImGui_Col_Text(), COL_ACCENT)
-        reaper.ImGui_Text(ctx, "FalconEYE")
+        reaper.ImGui_Text(ctx, "C@sp3r")
         reaper.ImGui_PopStyleColor(ctx)
         reaper.ImGui_PopFont(ctx)
         reaper.ImGui_SameLine(ctx)

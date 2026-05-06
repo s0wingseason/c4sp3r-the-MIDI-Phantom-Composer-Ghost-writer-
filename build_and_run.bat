@@ -1,9 +1,9 @@
 @echo off
 setlocal EnableDelayedExpansion
-title FalconEYE AI Arpeggio Generator — Build ^& Run
+title C@sp3r - MIDI Phantom Composer Ghost Writer — Build ^& Run
 echo.
 echo  ============================================================
-echo   FalconEYE AI Arpeggio Generator — Build ^& Run
+echo   C@sp3r - MIDI Phantom Composer Ghost Writer — Build ^& Run
 echo  ============================================================
 echo.
 
@@ -65,11 +65,11 @@ if exist "%APPDATA%\REAPER\Effects" (
     set "REAPER_EFFECTS=%APPDATA%\REAPER\Effects"
 )
 
-:: Create FalconEYE subfolder and copy JSFX
+:: Create Casper subfolder and copy JSFX
 if defined REAPER_EFFECTS (
-    set "DEST_DIR=!REAPER_EFFECTS!\FalconEYE"
+    set "DEST_DIR=!REAPER_EFFECTS!\Casper"
     if not exist "!DEST_DIR!" mkdir "!DEST_DIR!"
-    copy /Y "%JSFX_FILE%" "!DEST_DIR!\FalconEYE_AI_Arpeggio.jsfx" >nul
+    copy /Y "%JSFX_FILE%" "!DEST_DIR!\Casper_MIDI_Phantom.jsfx" >nul
     echo        Installed JSFX to: !DEST_DIR!
 
     :: Ensure Data directory exists for pattern files
@@ -77,7 +77,7 @@ if defined REAPER_EFFECTS (
     echo        REAPER Data directory ready.
 ) else (
     echo        [WARN] REAPER Effects folder not found at %%APPDATA%%\REAPER\Effects
-    echo        Please manually copy FalconEYE_AI_Arpeggio.jsfx to your REAPER Effects folder.
+    echo        Please manually copy the JSFX plugin to your REAPER Effects folder.
 )
 
 :: ---- Install ReaScript to REAPER ----
@@ -85,9 +85,9 @@ echo.
 echo  [5/6] Installing ReaScript to REAPER...
 set "REAPER_SCRIPTS=%APPDATA%\REAPER\Scripts"
 if exist "%REAPER_SCRIPTS%" (
-    set "SCRIPT_DEST=!REAPER_SCRIPTS!\FalconEYE"
+    set "SCRIPT_DEST=!REAPER_SCRIPTS!\Casper"
     if not exist "!SCRIPT_DEST!" mkdir "!SCRIPT_DEST!"
-    copy /Y "%LUA_FILE%" "!SCRIPT_DEST!\FalconEYE_AI_Arpeggio_Generator.lua" >nul
+    copy /Y "%LUA_FILE%" "!SCRIPT_DEST!\Casper_MIDI_Phantom.lua" >nul
     copy /Y "%DKJSON_FILE%" "!SCRIPT_DEST!\dkjson.lua" >nul
     echo        Installed ReaScript to: !SCRIPT_DEST!
     echo        To use in REAPER: Actions ^> Load ReaScript ^> select the .lua file
@@ -135,7 +135,7 @@ if %errorlevel% == 0 (
 
 echo.
 echo  ============================================================
-echo   FalconEYE AI Arpeggio Generator is running in background.
+echo   C@sp3r - MIDI Phantom Composer is running in background.
 echo   Web UI: http://localhost:8765
 echo   Logs:   %LOG_FILE%
 echo.

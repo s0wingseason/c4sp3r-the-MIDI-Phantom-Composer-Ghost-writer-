@@ -1,9 +1,8 @@
 """
-Desktop Launcher — FalconEYE AI Arpeggio Generator.
-Opens the web UI in a standalone native-like window.
-Uses flaskwebgui (Chrome/Edge) or falls back to system browser.
+Desktop Launcher — C@sp3r: the MIDI Phantom Composer Ghost Writer.
+Wraps the Flask server with a system tray icon and auto-opens the browser.
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import os
@@ -12,7 +11,7 @@ import logging
 from datetime import datetime
 
 # Configure logging to AppData (no console needed for background operation)
-_log_dir = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "FalconEYE", "logs")
+_log_dir = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "Casper", "logs")
 os.makedirs(_log_dir, exist_ok=True)
 _session_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 _log_file = os.path.join(_log_dir, f"session_{_session_stamp}.log")
@@ -96,7 +95,7 @@ def main():
                     time.sleep(0.2)
 
             window = webview.create_window(
-                title="FalconEYE AI Arpeggio Generator",
+                title="C@sp3r - MIDI Phantom Composer",
                 url=f"http://127.0.0.1:{port}",
                 width=1280, height=820,
                 min_size=(900, 600), resizable=True, text_select=True,

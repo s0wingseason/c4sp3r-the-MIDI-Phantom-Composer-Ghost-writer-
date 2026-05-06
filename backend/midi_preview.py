@@ -3,7 +3,7 @@ MIDI Preview — Plays pattern data through Windows' built-in MIDI synthesizer.
 Uses the Windows Multimedia API (winmm.dll) directly via ctypes for zero
 additional dependencies. Targets the Microsoft GS Wavetable Synth.
 
-(c) 2026 FalconEYE Software Dev
+(c) 2026 s0wingseason / Calvin D. Roberts
 """
 
 import ctypes

@@ -1,9 +1,9 @@
 @echo off
 setlocal EnableDelayedExpansion
-title FalconEYE AI Arpeggio Generator — Build Standalone .exe
+title C@sp3r - MIDI Phantom Composer — Build Standalone .exe
 echo.
 echo  ============================================================
-echo   FalconEYE AI Arpeggio Generator — Build Standalone .exe
+echo   C@sp3r - MIDI Phantom Composer — Build Standalone .exe
 echo  ============================================================
 echo.
 
@@ -12,7 +12,7 @@ set "PROJECT_DIR=%~dp0"
 set "VENV_DIR=%PROJECT_DIR%venv"
 set "BACKEND_DIR=%PROJECT_DIR%backend"
 set "REQUIREMENTS=%PROJECT_DIR%requirements.txt"
-set "EXE_NAME=FalconEYE_AI_Arpeggio_Generator"
+set "EXE_NAME=Casper_MIDI_Phantom_Composer"
 
 :: ---- Find Python ----
 echo  [1/4] Checking Python installation...
