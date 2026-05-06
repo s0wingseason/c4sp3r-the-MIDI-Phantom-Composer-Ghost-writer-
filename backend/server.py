@@ -679,6 +679,7 @@ def preview_play():
     bpm = float(data.get("bpm", 120))
     program = int(data.get("program", 0))
     loop = bool(data.get("loop", False))
+    solo_tracks = data.get("solo_tracks")  # List of track names for arrangements
 
     # If pattern_id provided, load from library
     if not pattern and data.get("pattern_id"):
@@ -690,14 +691,21 @@ def preview_play():
     if not pattern:
         with generation_lock:
             if generation_status.get("pattern"):
-                # Need the raw pattern data, reconstruct from display
                 return jsonify({"error": "Pass pattern data directly"}), 400
 
     if not pattern:
         return jsonify({"error": "No pattern to preview"}), 400
 
     player = get_player()
-    success = player.play(pattern, bpm=bpm, program=program, loop=loop)
+
+    # Route to arrangement playback if pattern has tracks
+    if pattern.get("type") == "arrangement" and pattern.get("tracks"):
+        success = player.play_arrangement(
+            pattern, bpm=bpm, solo_tracks=solo_tracks, loop=loop
+        )
+    else:
+        success = player.play(pattern, bpm=bpm, program=program, loop=loop)
+
     if success:
         return jsonify({"ok": True, "message": "Playback started"})
     else:
