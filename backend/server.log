@@ -1,0 +1,30 @@
+Exception in thread Thread-2 (start_browser):
+Traceback (most recent call last):
+  File "C:\dev\FalconEYE Software Dev\personal projects\audio etc\Txt to MIDI Arpeggio Generator for REAPER\venv\Lib\site-packages\psutil\_pswindows.py", line 666, in wrapper
+    return fun(self, *args, **kwargs)
+  File "C:\dev\FalconEYE Software Dev\personal projects\audio etc\Txt to MIDI Arpeggio Generator for REAPER\venv\Lib\site-packages\psutil\_pswindows.py", line 849, in send_signal
+    cext.proc_kill(self.pid)
+    ~~~~~~~~~~~~~~^^^^^^^^^^
+ProcessLookupError: [Errno 3] force no such process (originated from GetExitCodeProcess != STILL_ACTIVE)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Program Files\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Program Files\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\FalconEYE Software Dev\personal projects\audio etc\Txt to MIDI Arpeggio Generator for REAPER\venv\Lib\site-packages\flaskwebgui.py", line 293, in start_browser
+    kill_port(self.port)
+    ~~~~~~~~~^^^^^^^^^^^
+  File "C:\dev\FalconEYE Software Dev\personal projects\audio etc\Txt to MIDI Arpeggio Generator for REAPER\venv\Lib\site-packages\flaskwebgui.py", line 85, in kill_port
+    proc.send_signal(signal.SIGTERM)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\dev\FalconEYE Software Dev\personal projects\audio etc\Txt to MIDI Arpeggio Generator for REAPER\venv\Lib\site-packages\psutil\__init__.py", line 1297, in send_signal
+    self._proc.send_signal(sig)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\dev\FalconEYE Software Dev\personal projects\audio etc\Txt to MIDI Arpeggio Generator for REAPER\venv\Lib\site-packages\psutil\_pswindows.py", line 668, in wrapper
+    raise convert_oserror(err, pid=self.pid, name=self._name) from err
+psutil.NoSuchProcess: process no longer exists (pid=62844)

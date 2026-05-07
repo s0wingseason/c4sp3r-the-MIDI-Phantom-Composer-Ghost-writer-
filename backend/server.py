@@ -740,6 +740,142 @@ def preview_drumnames():
     return jsonify({"drum_names": {str(k): v for k, v in GM_DRUM_NAMES.items()}})
 
 
+# ---- MIDI Export & REAPER Import ----
+
+@app.route("/api/export/midi", methods=["POST"])
+def export_midi():
+    """Generate and return a MIDI file for the given pattern data."""
+    from io import BytesIO
+    from midi_export import pattern_to_midi, export_arrangement_midi
+    import tempfile
+
+    data = request.get_json()
+    pattern = data.get("pattern")
+
+    if not pattern and data.get("pattern_id"):
+        lib_data = library.get_pattern(data["pattern_id"])
+        if lib_data:
+            pattern = lib_data["pattern"]
+
+    if not pattern:
+        return jsonify({"error": "No pattern to export"}), 400
+
+    pattern_name = pattern.get("pattern_name", "AI_Pattern")
+    safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in pattern_name)[:60]
+
+    try:
+        if pattern.get("type") == "arrangement" and pattern.get("tracks"):
+            # Multi-track arrangement → Type 1 MIDI
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mid")
+            tmp.close()
+            export_arrangement_midi(pattern, tmp.name)
+            with open(tmp.name, "rb") as f:
+                midi_bytes = f.read()
+            os.unlink(tmp.name)
+        else:
+            # Single-track pattern → Type 0 MIDI
+            midi_bytes = pattern_to_midi(pattern)
+
+        response = app.response_class(
+            response=midi_bytes,
+            status=200,
+            mimetype="audio/midi",
+        )
+        response.headers["Content-Disposition"] = f'attachment; filename="{safe_name}.mid"'
+        response.headers["Content-Length"] = len(midi_bytes)
+        return response
+
+    except Exception as e:
+        logger.error("MIDI export error: %s", str(e))
+        return jsonify({"error": f"Export failed: {str(e)}"}), 500
+
+
+@app.route("/api/export/midi/reaper", methods=["POST"])
+def export_midi_to_reaper():
+    """Export MIDI file directly to REAPER Data directory for import."""
+    import tempfile
+
+    data = request.get_json()
+    pattern = data.get("pattern")
+
+    if not pattern and data.get("pattern_id"):
+        lib_data = library.get_pattern(data["pattern_id"])
+        if lib_data:
+            pattern = lib_data["pattern"]
+
+    if not pattern:
+        return jsonify({"error": "No pattern to export"}), 400
+
+    pattern_name = pattern.get("pattern_name", "AI_Pattern")
+    safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in pattern_name)[:60]
+
+    try:
+        data_path = find_reaper_data_path("auto")
+        midi_path = os.path.join(data_path, f"{safe_name}.mid")
+
+        if pattern.get("type") == "arrangement" and pattern.get("tracks"):
+            export_arrangement_midi(pattern, midi_path)
+        else:
+            export_midi_file(pattern, midi_path)
+
+        # Also write a "latest" symlink-style marker for the import script
+        marker_path = os.path.join(data_path, "AI_latest_midi_export.txt")
+        with open(marker_path, "w", encoding="utf-8") as f:
+            f.write(midi_path)
+
+        logger.info("MIDI exported to REAPER: %s", midi_path)
+        return jsonify({
+            "ok": True,
+            "message": f"MIDI exported to REAPER",
+            "path": midi_path,
+            "filename": f"{safe_name}.mid",
+        })
+
+    except Exception as e:
+        logger.error("REAPER MIDI export error: %s", str(e))
+        return jsonify({"error": f"Export failed: {str(e)}"}), 500
+
+
+@app.route("/api/export/midi/blob", methods=["POST"])
+def export_midi_blob():
+    """Return MIDI as base64 data URL for drag-and-drop from the browser."""
+    import base64
+    from midi_export import pattern_to_midi, export_arrangement_midi
+    import tempfile
+
+    data = request.get_json()
+    pattern = data.get("pattern")
+
+    if not pattern:
+        return jsonify({"error": "No pattern"}), 400
+
+    pattern_name = pattern.get("pattern_name", "AI_Pattern")
+    safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in pattern_name)[:60]
+
+    try:
+        if pattern.get("type") == "arrangement" and pattern.get("tracks"):
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mid")
+            tmp.close()
+            export_arrangement_midi(pattern, tmp.name)
+            with open(tmp.name, "rb") as f:
+                midi_bytes = f.read()
+            os.unlink(tmp.name)
+        else:
+            midi_bytes = pattern_to_midi(pattern)
+
+        b64 = base64.b64encode(midi_bytes).decode("ascii")
+        return jsonify({
+            "ok": True,
+            "data": b64,
+            "filename": f"{safe_name}.mid",
+            "mime": "audio/midi",
+            "size": len(midi_bytes),
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ---- Open Folder in Explorer ----
 
 @app.route("/api/open-folder/data", methods=["POST"])

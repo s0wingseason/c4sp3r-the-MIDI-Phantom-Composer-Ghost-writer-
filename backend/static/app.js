@@ -535,6 +535,8 @@ function displayPattern(pattern) {
     DOM.infoBPM.textContent = pattern.bpm_suggestion || '—';
     DOM.previewMeta.textContent = `${pattern.num_events} events • ${pattern.loop_length_beats} beats`;
     DOM.reaperHint.style.display = 'flex';
+    const exportBar = document.getElementById('midiExportBar');
+    if (exportBar) exportBar.style.display = 'flex';
 
     // Mode-specific info cards
     if (DOM.infoScaleCard) DOM.infoScaleCard.style.display = isDrums ? 'none' : '';
@@ -584,6 +586,9 @@ function displayPattern(pattern) {
             if (d.pattern) { currentPatternRaw = d.pattern; pushVersion(d.pattern, pattern); }
         });
     }
+
+    // Notify hooks (e.g. pre-cache MIDI blob for drag-and-drop)
+    if (window._afterDisplayPattern) window._afterDisplayPattern();
 }
 
 // ============================================================
@@ -698,6 +703,106 @@ document.getElementById('toggleAllTracks')?.addEventListener('click', () => {
     toggles.forEach(b => {
         if (b.style.display !== 'none') b.classList.toggle('active', !allActive);
     });
+});
+// ============================================================
+// MIDI Export, REAPER Import & Drag-and-Drop
+// ============================================================
+
+/** Download the current pattern as a .mid file */
+document.getElementById('btnExportMidi')?.addEventListener('click', async () => {
+    if (!currentPatternRaw && !currentPattern) return;
+    const pattern = currentPatternRaw || currentPattern;
+    try {
+        const resp = await fetch('/api/export/midi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pattern }),
+        });
+        if (!resp.ok) { setStatus('error', 'MIDI export failed'); return; }
+        const blob = await resp.blob();
+        const name = (pattern.pattern_name || 'AI_Pattern').replace(/[^a-zA-Z0-9 _-]/g, '_') + '.mid';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name; document.body.appendChild(a);
+        a.click(); a.remove(); URL.revokeObjectURL(url);
+        setStatus('idle', `MIDI exported: ${name}`);
+    } catch (e) { setStatus('error', `Export error: ${e.message}`); }
+});
+
+/** Export MIDI directly to REAPER Data folder and trigger import */
+document.getElementById('btnExportReaper')?.addEventListener('click', async () => {
+    if (!currentPatternRaw && !currentPattern) return;
+    const pattern = currentPatternRaw || currentPattern;
+    try {
+        const r = await apiPost('/api/export/midi/reaper', { pattern });
+        if (r.ok) {
+            setStatus('idle', `MIDI saved to REAPER: ${r.filename}`);
+            // Flash the REAPER hint
+            DOM.reaperHint.style.display = 'flex';
+            DOM.reaperHint.classList.add('highlight');
+            setTimeout(() => DOM.reaperHint.classList.remove('highlight'), 2000);
+        } else {
+            setStatus('error', r.error || 'Export failed');
+        }
+    } catch (e) { setStatus('error', `Export error: ${e.message}`); }
+});
+
+/** Drag-and-drop: pre-cache MIDI blob so dragstart is synchronous */
+const dragHandle = document.getElementById('dragMidiHandle');
+let _cachedMidiBlob = null;
+let _cachedMidiUrl = null;
+let _cachedMidiName = null;
+let _midiCachePatternId = null;
+
+/** Pre-generate the MIDI blob whenever a new pattern is displayed */
+async function _preCacheMidiBlob() {
+    const pattern = currentPatternRaw || currentPattern;
+    if (!pattern) return;
+    const patId = pattern.pattern_name + '_' + (pattern.num_events || 0);
+    if (patId === _midiCachePatternId && _cachedMidiBlob) return; // already cached
+
+    try {
+        const r = await apiPost('/api/export/midi/blob', { pattern });
+        if (!r.ok) return;
+        const byteChars = atob(r.data);
+        const byteArr = new Uint8Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+        if (_cachedMidiUrl) URL.revokeObjectURL(_cachedMidiUrl);
+        _cachedMidiBlob = new Blob([byteArr], { type: 'audio/midi' });
+        _cachedMidiName = r.filename;
+        _cachedMidiUrl = URL.createObjectURL(_cachedMidiBlob);
+        _midiCachePatternId = patId;
+    } catch (_) { /* silent */ }
+}
+
+// Pre-cache after each pattern display — hook into displayPattern
+const _origDisplayPatternForDrag = window._afterDisplayPattern || (() => {});
+window._afterDisplayPattern = () => { _origDisplayPatternForDrag(); _preCacheMidiBlob(); };
+
+// Also pre-cache on mousedown so blob is ready before dragstart fires
+dragHandle?.addEventListener('mousedown', () => _preCacheMidiBlob());
+
+dragHandle?.addEventListener('dragstart', (e) => {
+    const pattern = currentPatternRaw || currentPattern;
+    if (!pattern || !_cachedMidiBlob || !_cachedMidiUrl) {
+        // No cached blob — export to REAPER Data as fallback
+        e.preventDefault();
+        apiPost('/api/export/midi/reaper', { pattern }).then(r => {
+            if (r?.ok) setStatus('idle', `MIDI saved to REAPER: ${r.filename}`);
+        }).catch(() => {});
+        return;
+    }
+
+    dragHandle.classList.add('dragging');
+    // Must be synchronous — use pre-cached URL
+    e.dataTransfer.setData('DownloadURL', `audio/midi:${_cachedMidiName}:${_cachedMidiUrl}`);
+    e.dataTransfer.setData('text/uri-list', _cachedMidiUrl);
+    e.dataTransfer.effectAllowed = 'copy';
+});
+
+dragHandle?.addEventListener('dragend', () => {
+    dragHandle.classList.remove('dragging');
+    setStatus('idle', _cachedMidiName ? `Drag complete: ${_cachedMidiName}` : 'Ready');
 });
 
 // ============================================================

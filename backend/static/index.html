@@ -650,6 +650,35 @@
                         </div>
                     </div>
 
+                    <!-- 💾 MIDI Export & Import Actions -->
+                    <div class="midi-export-bar" id="midiExportBar" style="display:none">
+                        <button class="btn-export-midi" id="btnExportMidi" title="Download as .mid file">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Export MIDI
+                        </button>
+                        <button class="btn-export-reaper" id="btnExportReaper" title="Export .mid to REAPER Data folder for import">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="12" y1="18" x2="12" y2="12"/>
+                                <line x1="9" y1="15" x2="12" y2="12"/>
+                                <line x1="15" y1="15" x2="12" y2="12"/>
+                            </svg>
+                            Insert into REAPER
+                        </button>
+                        <div class="drag-midi-handle" id="dragMidiHandle" draggable="true" title="Drag this into your DAW to import the MIDI pattern">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/>
+                                <circle cx="15" cy="5" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+                            </svg>
+                            Drag to DAW
+                        </div>
+                    </div>
+
                     <div class="reaper-hint" id="reaperHint" style="display:none">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -657,8 +686,8 @@
                             <line x1="12" y1="16" x2="12" y2="12" />
                             <line x1="12" y1="8" x2="12.01" y2="8" />
                         </svg>
-                        <span>Pattern saved! In REAPER, click <strong>Reload Pattern</strong> on the JSFX, then press
-                            Play.</span>
+                        <span>Pattern saved! Use <strong>JSFX → Reload Pattern</strong> for real-time playback,
+                            or run <strong>Casper_Import_MIDI.lua</strong> to insert as a MIDI item.</span>
                     </div>
                 </div>
             </section>
